@@ -511,7 +511,7 @@ async function pintarSesion(){
   $("completar").hidden = !(usuario && !perfil);
   if(perfil){
     const fundador = perfil.numero<=100;
-    $("pTit").textContent=`Socio nº ${fmt(perfil.numero)}${fundador?" · Fundador":""}`;
+    $("pTit").textContent = perfil.es_admin ? "Administrador del club" : `Socio nº ${fmt(perfil.numero)}${fundador?" · Fundador":""}`;
     $("pUsr").textContent="@"+perfil.ig;
     $("pCod").textContent=perfil.codigo||"";
     $("pLug").textContent=`${bandera(perfil.pais)} ${perfil.provincia}, ${nombre(perfil.pais)}`;
@@ -521,7 +521,7 @@ async function pintarSesion(){
       ? "Tu carnet está <b>activo</b>. Sigue sumando puntos para tu país."
       : `Para activar tu carnet, síguenos en <b>@club.desdecero</b> y mándanos <b>${esc(perfil.codigo||"")}</b> por mensaje directo.`;
     $("pProp").innerHTML = perfil.propuesta ? `Tu propuesta de nombre: <b>${esc(perfil.propuesta)}</b>.` : `Aún no has propuesto nombre. <a href="#voto">Propón uno</a> y gana 10 puntos.`;
-    $("pRank").textContent="#"+fmt(await puestoDe(perfil));
+    $("pRank").textContent = perfil.es_admin ? "Admin" : "#"+fmt(await puestoDe(perfil));
   }
   pintarPropuestas();
   if(typeof cargarAdmin==="function") cargarAdmin();
