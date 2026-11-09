@@ -145,6 +145,14 @@ label small{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
 .nm small.fin{color:var(--verde);font-weight:600}
 .nm small.autor{display:block;color:var(--gris);font-weight:500;font-size:12px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--tiza);color:var(--fondo);font-weight:700;padding:12px 18px;border-radius:8px;z-index:20;max-width:calc(100% - 32px);text-align:center}
+.admin{border:2px dashed var(--tiza)}
+.admin h4{margin:18px 0 8px}
+.ptsForm{display:grid;grid-template-columns:1fr 120px auto;gap:10px;align-items:end}
+@media (max-width:460px){.ptsForm{grid-template-columns:1fr 1fr}.ptsForm .btn{grid-column:1/-1}}
+.btn.peligro{background:var(--rojo);color:#fff}
+.pend{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--fondo);border-radius:6px;padding:8px 10px;margin-top:6px;font-size:14px}
+.pend code{font-family:var(--mono);color:var(--gris)}
+.x-btn{background:none;border:1px solid var(--rojo);color:var(--rojo);border-radius:6px;padding:4px 10px;cursor:pointer;font-weight:700;margin-left:6px}
 </style>
 </head>
 <body>
@@ -195,6 +203,35 @@ label small{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
     <p class="tras" id="pProp"></p>
     <button class="btn sec" type="button" id="copy">Copiar mi código</button>
     <div class="ok" id="ok" role="status"></div>
+  </section>
+
+  <!-- PANEL ADMIN (solo lo ve el admin; la base de datos lo comprueba igualmente) -->
+  <section class="alta admin" id="admin" hidden>
+    <div class="perfil-top"><h2>Panel de admin</h2><span class="dia">SOLO TÚ</span></div>
+
+    <h4>Activar carnet</h4>
+    <form id="fAct" class="nomForm" novalidate>
+      <label for="aCod">Código que te mandan por DM<input id="aCod" placeholder="SOCIO-XXXXX" autocomplete="off"></label>
+      <button class="btn" type="submit">Activar</button>
+    </form>
+    <div id="pendBox"></div>
+
+    <h4>Dar o quitar puntos</h4>
+    <form id="fPts" class="ptsForm" novalidate>
+      <label for="aIg">@ del socio<input id="aIg" placeholder="@usuario" autocomplete="off"></label>
+      <label for="aCant">Puntos<input id="aCant" type="number" inputmode="numeric" placeholder="10 o -10"></label>
+      <button class="btn" type="submit">Aplicar</button>
+    </form>
+
+    <h4>Borrar socio</h4>
+    <p class="nota">Para cuando alguien te pide BORRAR por DM. Se elimina su cuenta y todo lo suyo, y no se puede deshacer.</p>
+    <form id="fBorrar" class="form" novalidate>
+      <label for="bIg">@ del socio<input id="bIg" placeholder="@usuario" autocomplete="off"></label>
+      <label for="bOk" class="check"><input type="checkbox" id="bOk"><span>Sí, quiero borrar este socio para siempre.</span></label>
+      <button class="btn peligro" type="submit">Borrar socio</button>
+    </form>
+    <p class="nota">Las propuestas de nombre se borran desde la lista de propuestas, con el botón ✕.</p>
+    <div class="ok" id="aMsg" role="status"></div>
   </section>
 
   <!-- COMPLETAR (cuenta creada pero sin carnet) -->
@@ -431,7 +468,7 @@ function pintarPropuestas(){
     return `<li class="row" style="grid-template-columns:24px 1fr auto auto;cursor:default">
       <span class="p">${i+1}</span>
       <span class="nm">${esc(p.nombre)}${i<2?' <small class="fin">· a la final</small>':""}<small class="autor">de @${esc(p.autor)}</small></span>
-      <span class="s">${fmt(p.apoyos)}<small>apoyos</small></span>${btn||"<span></span>"}
+      <span class="s">${fmt(p.apoyos)}<small>apoyos</small></span><span>${btn}${perfil?.es_admin?`<button class="x-btn" type="button" data-del="${p.id}" aria-label="Borrar propuesta">✕</button>`:""}</span>
     </li>`;}).join("")+'</ol>';
 }
 $("propBox").addEventListener("click", async e=>{
@@ -487,6 +524,7 @@ async function pintarSesion(){
     $("pRank").textContent="#"+fmt(await puestoDe(perfil));
   }
   pintarPropuestas();
+  if(typeof cargarAdmin==="function") cargarAdmin();
 }
 $("salir").addEventListener("click", async ()=>{ await sb.auth.signOut(); toast("Has salido de tu cuenta"); });
 $("copy").addEventListener("click",()=>{
@@ -576,6 +614,50 @@ sb.auth.onAuthStateChange((ev, session)=>{
   usuario = session?.user || null;
   if(ev==="PASSWORD_RECOVERY"){ recuperando=true; verTab("nueva"); $("alta").hidden=false; $("alta").scrollIntoView(); }
   setTimeout(cargarPerfil,0);
+});
+
+
+/* ---------- admin ---------- */
+const aMsg = (t, bien=true) => { $("aMsg").style.color = bien ? "var(--verde)" : "var(--rojo)"; $("aMsg").textContent = t; };
+async function cargarAdmin(){
+  $("admin").hidden = !perfil?.es_admin;
+  if(!perfil?.es_admin) return;
+  const { data, error } = await sb.rpc("admin_pendientes");
+  if(error) return aMsg(errMsg(error), false);
+  $("pendBox").innerHTML = !data.length ? '<p class="nota">No hay carnets pendientes de activar.</p>'
+    : '<p class="nota">Sin activar ('+data.length+'):</p>' + data.slice(0,30).map(x=>`<div class="pend"><span>${bandera(x.pais)} @${esc(x.ig)} · <code>${esc(x.codigo||"")}</code></span><button class="btn sec mini-btn" type="button" data-act="${esc(x.codigo||"")}">Activar</button></div>`).join("");
+}
+async function activar(cod){
+  const { data, error } = await sb.rpc("admin_activar",{ p_codigo:cod });
+  if(error) return aMsg(errMsg(error), false);
+  aMsg(`Carnet de @${data} activado · +10 puntos`); $("aCod").value="";
+  cargarAdmin(); refrescarPublico();
+}
+$("fAct").addEventListener("submit", e=>{ e.preventDefault(); const c=$("aCod").value.trim(); if(c) activar(c); });
+$("pendBox").addEventListener("click", e=>{ const b=e.target.closest("[data-act]"); if(b){ b.disabled=true; activar(b.dataset.act); } });
+$("fPts").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const ig=limpiarIg($("aIg").value), n=parseInt($("aCant").value,10);
+  if(!ig || !n) return aMsg("Escribe el @ y los puntos (por ejemplo 10 o -10).", false);
+  const { data, error } = await sb.rpc("admin_puntos",{ p_ig:ig, p_cantidad:n });
+  if(error) return aMsg(errMsg(error), false);
+  aMsg(`@${ig} ahora tiene ${fmt(data)} puntos`); $("aCant").value=""; refrescarPublico(); cargarPerfil();
+});
+$("fBorrar").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const ig=limpiarIg($("bIg").value);
+  if(!ig) return aMsg("Escribe el @ del socio.", false);
+  if(!$("bOk").checked) return aMsg("Marca la casilla para confirmar.", false);
+  const { error } = await sb.rpc("admin_borrar_socio",{ p_ig:ig });
+  if(error) return aMsg(errMsg(error), false);
+  aMsg(`Socio @${ig} borrado`); $("bIg").value=""; $("bOk").checked=false; cargarAdmin(); refrescarPublico();
+});
+$("propBox").addEventListener("click", async e=>{
+  const b=e.target.closest("[data-del]"); if(!b) return;
+  if(b.dataset.seguro!=="1"){ b.dataset.seguro="1"; b.textContent="¿Borrar?"; setTimeout(()=>{ b.dataset.seguro=""; b.textContent="✕"; },3000); return; }
+  const { error } = await sb.rpc("admin_borrar_propuesta",{ p_id:Number(b.dataset.del) });
+  if(error) return toast(errMsg(error));
+  toast("Propuesta borrada"); refrescarPublico();
 });
 
 /* ---------- reloj y arranque ---------- */
