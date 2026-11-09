@@ -26,6 +26,7 @@ create table if not exists public.ig_config (
 alter table public.ig_comentarios enable row level security;
 alter table public.ig_config      enable row level security;
 revoke all on public.ig_comentarios, public.ig_config from anon, authenticated;
+grant select, insert, update, delete on public.ig_comentarios, public.ig_config to service_role;
 
 -- Lo que ve la web: nombres propuestos en Instagram, agrupados, con sus likes
 create or replace view public.v_ig_propuestas as
