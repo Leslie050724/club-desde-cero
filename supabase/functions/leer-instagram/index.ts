@@ -32,12 +32,28 @@ Deno.serve(async (req) => {
     sb.from("ig_config").upsert({ clave, valor });
 
   // Token: el último renovado, o el que pegaste en Secrets
-  let token = get("token") ?? Deno.env.get("IG_TOKEN");
+  let token: string | null = get("token") ?? Deno.env.get("IG_TOKEN") ?? null;
   if (!token) return Response.json({ ok: false, error: "Falta IG_TOKEN en Secrets" }, { status: 500 });
 
-  // Renovar el token cada 7 días (dura 60) para que no caduque nunca
+  // Dos tipos de token: de Instagram ("IG…", graph.instagram.com) o de Facebook ("EAA…", graph.facebook.com)
+  const esFB = token.startsWith("EAA");
+  const API = esFB ? "https://graph.facebook.com/v21.0" : IG;
+  let yo = "me";
+  if (esFB) {
+    yo = Deno.env.get("IG_USER_ID") ?? get("ig_user_id") ?? "";
+    if (!yo) {
+      const r = await fetch(`${API}/me/accounts?fields=instagram_business_account&access_token=${token}`);
+      const j = await r.json();
+      yo = j.data?.find((p: { instagram_business_account?: { id: string } }) => p.instagram_business_account)
+        ?.instagram_business_account?.id ?? "";
+      if (yo) await guardar("ig_user_id", yo);
+    }
+    if (!yo) return Response.json({ ok: false, error: "Falta IG_USER_ID en Secrets" }, { status: 500 });
+  }
+
+  // Renovar el token de Instagram cada 7 días (dura 60). El de Facebook (SUAT) no caduca.
   const renovado = get("token_renovado");
-  if (!renovado || Date.now() - Date.parse(renovado) > 7 * 864e5) {
+  if (!esFB && (!renovado || Date.now() - Date.parse(renovado) > 7 * 864e5)) {
     const r = await fetch(`${IG}/refresh_access_token?grant_type=ig_refresh_token&access_token=${token}`);
     if (r.ok) {
       const j = await r.json();
@@ -50,7 +66,7 @@ Deno.serve(async (req) => {
   // Vídeo a leer: el que fijes en ig_config.media_id, o el último publicado
   let mediaId = get("media_id");
   if (!mediaId) {
-    const r = await fetch(`${IG}/me/media?fields=id,timestamp&limit=1&access_token=${token}`);
+    const r = await fetch(`${API}/${yo}/media?fields=id,timestamp&limit=1&access_token=${token}`);
     const j = await r.json();
     if (!r.ok) return Response.json({ ok: false, error: j.error?.message ?? "Error leyendo vídeos" }, { status: 502 });
     mediaId = j.data?.[0]?.id ?? null;
@@ -60,7 +76,7 @@ Deno.serve(async (req) => {
   // Leer todos los comentarios con sus likes (paginando)
   const filas: Record<string, unknown>[] = [];
   let url: string | null =
-    `${IG}/${mediaId}/comments?fields=id,text,like_count,username,timestamp&limit=50&access_token=${token}`;
+    `${API}/${mediaId}/comments?fields=id,text,like_count,username,timestamp&limit=50&access_token=${token}`;
   while (url && filas.length < 5000) {
     const r = await fetch(url);
     const j = await r.json();
