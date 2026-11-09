@@ -83,6 +83,8 @@ select cron.schedule(
   select net.http_post(
     url     := 'https://hfifwigvumvxrnljubhk.supabase.co/functions/v1/leer-instagram',
     headers := jsonb_build_object('Content-Type', 'application/json',
+                                  'Authorization', 'Bearer sb_publishable_5yWCC5MruLVrLlpwAkC2KA_lAFp5t8x',
+                                  'apikey', 'sb_publishable_5yWCC5MruLVrLlpwAkC2KA_lAFp5t8x',
                                   'x-cron-secret', 'PON_AQUI_TU_CLAVE_SECRETA'),
     body    := '{}'::jsonb
   );
