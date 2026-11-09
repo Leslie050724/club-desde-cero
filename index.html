@@ -156,6 +156,10 @@ label small{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
 .modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.7);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .modal-box{background:var(--panel);border:2px solid var(--tiza);border-radius:12px;padding:20px;width:100%;max-width:420px}
 .ig-tit{margin:18px 0 4px}
+.invita{margin-top:16px;padding-top:14px;border-top:1px solid var(--linea)}
+.invita h4{margin:0 0 4px}
+.invita-link{background:var(--fondo);border:1px solid var(--linea);border-radius:6px;padding:10px;overflow-x:auto}
+.invita-link code{font-family:var(--mono);font-size:13px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -201,6 +205,13 @@ label small{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
       <div><b id="pPts">0</b><span>puntos</span></div>
       <div><b id="pRank">–</b><span>puesto</span></div>
       <div><b id="pEst">–</b><span>carnet</span></div>
+    </div>
+    <div class="invita">
+      <h4>Invita a tus amigos · +15 puntos</h4>
+      <p class="nota" style="margin:0 0 8px">Por cada amigo que se haga socio con tu enlace y active su carnet, ganas <b>15 puntos</b>.</p>
+      <div class="invita-link"><code id="pLink"></code></div>
+      <div class="ctas" style="margin-top:8px"><button class="btn" type="button" id="compartir">Compartir mi enlace</button><button class="btn sec" type="button" id="copyLink">Copiar enlace</button></div>
+      <p class="nota" id="pInv" style="margin:8px 0 0"></p>
     </div>
     <p class="tras" id="pAct"></p>
     <p class="tras" id="pProp"></p>
@@ -308,6 +319,7 @@ label small{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
       <div class="pt"><b>+10</b><p>Proponer un nombre para el club</p></div>
       <div class="pt"><b>+5</b><p>Cada apoyo que das (hasta 3)</p></div>
       <div class="pt"><b>+10</b><p>Activar tu carnet mandando tu código por DM</p></div>
+      <div class="pt"><b>+15</b><p>Cada amigo que se haga socio con tu enlace</p></div>
       <div class="pt"><b>★</b><p>Los 100 primeros socios serán Fundadores para siempre</p></div>
     </div>
   </section>
@@ -321,6 +333,7 @@ label small{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
 
     <form id="fAlta" class="form" novalidate>
       <p class="sub">Gratis. Crea tu cuenta y no perderás nunca tus puntos.</p>
+      <p class="nota" id="refAviso" hidden></p>
       <label for="ig">Tu @ de Instagram o TikTok<input id="ig" placeholder="@tu_usuario" autocomplete="username"></label>
       <label for="email">Tu correo<input id="email" type="email" placeholder="tu@correo.com" autocomplete="email"><small>Para entrar y recuperar tu cuenta si olvidas la contraseña. Nunca se muestra.</small></label>
       <label for="pass">Crea una contraseña<input id="pass" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><small>⚠️ No uses la contraseña de tu Instagram.</small></label>
@@ -379,6 +392,13 @@ label small{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
 const SUPABASE_URL = "https://hfifwigvumvxrnljubhk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_5yWCC5MruLVrLlpwAkC2KA_lAFp5t8x";
 const HASH_INICIAL = location.hash + location.search;
+const URL_WEB = location.origin + location.pathname;
+let REF = null;
+try{
+  const r = new URLSearchParams(location.search).get("ref");
+  if(r && /^[a-zA-Z0-9._]{2,30}$/.test(r)){ REF=r; localStorage.setItem("club_ref", r); }
+  else REF = localStorage.getItem("club_ref");
+}catch(_){}
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const $ = id => document.getElementById(id);
@@ -537,6 +557,10 @@ async function pintarSesion(){
       ? "Tu carnet está <b>activo</b>. Sigue sumando puntos para tu país."
       : `Para activar tu carnet, síguenos en <b>@club.desdecero</b> y mándanos <b>${esc(perfil.codigo||"")}</b> por mensaje directo.`;
     $("pProp").innerHTML = perfil.propuesta ? `Tu propuesta de nombre: <b>${esc(perfil.propuesta)}</b>.` : `Aún no has propuesto nombre. <a href="#voto">Propón uno</a> y gana 10 puntos.`;
+    const link = URL_WEB + "?ref=" + encodeURIComponent(perfil.ig);
+    $("pLink").textContent = link;
+    const inv=perfil.invitados||0, act=perfil.invitados_activos||0;
+    $("pInv").innerHTML = inv ? `Has invitado a <b>${inv}</b> amigo${inv===1?"":"s"} · <b>${act}</b> con carnet activo (+${act*15} puntos).` : "Aún no has invitado a nadie. ¡Sé el primero de tu grupo!";
     $("pRank").textContent = perfil.es_admin ? "Admin" : "#"+fmt(await puestoDe(perfil));
   }
   pintarPropuestas();
@@ -563,7 +587,7 @@ $("fCompletar").addEventListener("submit", async e=>{
   if(!igValido(ig)) return $("errC").textContent="Escribe tu @ (letras, números, puntos o guiones bajos).";
   if(!pais) return $("errC").textContent="Elige tu país.";
   if(!prov) return $("errC").textContent="Elige o escribe tu provincia.";
-  const { error } = await sb.rpc("hacerse_socio",{ p_ig:ig, p_pais:pais, p_provincia:prov });
+  const { error } = await sb.rpc("hacerse_socio",{ p_ig:ig, p_pais:pais, p_provincia:prov, p_ref:REF });
   if(error) return $("errC").textContent = /duplicate|unique/i.test(error.message) ? "Ese @ ya es socio." : errMsg(error);
   toast("¡Ya eres socio!"); await cargarPerfil(); refrescarPublico();
 });
@@ -595,7 +619,8 @@ $("fAlta").addEventListener("submit", async e=>{
     const { data, error:e2 } = await sb.auth.signUp({ email, password:pass, options:{ data:{ ig } } });
     if(e2) throw new Error(/registered|exists/i.test(e2.message) ? "Ese correo ya tiene cuenta. Entra en \"Ya soy socio\"." : e2.message);
     if(!data.session) throw new Error("Revisa tu correo para confirmar la cuenta y luego entra.");
-    const { error:e3 } = await sb.rpc("hacerse_socio",{ p_ig:ig, p_pais:pais, p_provincia:prov });
+    try{ localStorage.removeItem("club_ref"); }catch(_){}
+    const { error:e3 } = await sb.rpc("hacerse_socio",{ p_ig:ig, p_pais:pais, p_provincia:prov, p_ref:REF });
     if(e3) throw e3;
     toast("¡Bienvenido al club!");
     usuario = data.session.user; await cargarPerfil(); refrescarPublico();
@@ -731,6 +756,20 @@ async function estadoIG(){
     ? `Última lectura: ${new Date(data.ultima_lectura).toLocaleString("es-ES")} · ${fmt(data.comentarios)} comentarios guardados.`
     : "Conectado, pero aún no se ha leído ningún comentario.";
 }
+
+
+/* ---------- invitaciones ---------- */
+if(REF){ $("refAviso").hidden=false; $("refAviso").innerHTML=`Te ha invitado <b>@${esc(REF)}</b>. Al hacerte socio y activar tu carnet, le das 15 puntos.`; }
+function copiarTexto(t, el){
+  navigator.clipboard.writeText(t).then(()=>toast("Enlace copiado")).catch(()=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Selecciona y copia el enlace");});
+}
+$("copyLink").addEventListener("click",()=>copiarTexto($("pLink").textContent,$("pLink")));
+$("compartir").addEventListener("click", async ()=>{
+  const url=$("pLink").textContent;
+  const texto="⚽ Estamos creando un club de fútbol entre todos. Hazte socio gratis y vota el nombre:";
+  if(navigator.share){ try{ await navigator.share({ title:"Club desde Cero", text:texto, url }); return; }catch(e){ if(e.name==="AbortError") return; } }
+  copiarTexto(url,$("pLink"));
+});
 
 /* ---------- reloj y arranque ---------- */
 const CIERRE_DIA = new Date("2026-11-10T19:30:00Z"); // 19:30 en Canarias (cambia esta fecha cada día)
