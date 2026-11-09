@@ -324,7 +324,7 @@ label small{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
 
     <form id="fEntrar" class="form" novalidate hidden>
       <p class="sub">Entra para ver tus puntos y tu carnet.</p>
-      <label for="eEmail">Tu correo<input id="eEmail" type="email" autocomplete="email"></label>
+      <label for="eEmail">Tu correo o tu @<input id="eEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="tu@correo.com o @tu_usuario"></label>
       <label for="ePass">Tu contraseña<input id="ePass" type="password" autocomplete="current-password"></label>
       <button class="btn" type="submit">Entrar</button>
       <button class="link" type="button" id="olvide">He olvidado mi contraseña</button>
@@ -590,13 +590,25 @@ $("fAlta").addEventListener("submit", async e=>{
 
 $("fEntrar").addEventListener("submit", async e=>{
   e.preventDefault();
-  const { error } = await sb.auth.signInWithPassword({ email:$("eEmail").value.trim(), password:$("ePass").value });
-  if(error) return $("errE").textContent = /invalid/i.test(error.message) ? "Correo o contraseña incorrectos." : errMsg(error);
+  const quien=$("eEmail").value.trim(), pass=$("ePass").value;
+  if(!quien || !pass) return $("errE").textContent="Escribe tu correo o tu @ y tu contraseña.";
+  let email=quien;
+  const esCorreo = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(quien);
+  if(!esCorreo){
+    const ig=limpiarIg(quien);
+    if(!igValido(ig)) return $("errE").textContent="Escribe un correo o un @ válido.";
+    const { data, error:e1 } = await sb.rpc("correo_para_entrar",{ p_ig:ig, p_pass:pass });
+    if(e1) return $("errE").textContent=errMsg(e1);
+    if(!data) return $("errE").textContent="Usuario o contraseña incorrectos.";
+    email=data;
+  }
+  const { error } = await sb.auth.signInWithPassword({ email, password:pass });
+  if(error) return $("errE").textContent = /invalid/i.test(error.message) ? (esCorreo?"Correo o contraseña incorrectos.":"Usuario o contraseña incorrectos.") : errMsg(error);
   $("errE").textContent=""; toast("¡Hola de nuevo!");
 });
 $("olvide").addEventListener("click", async ()=>{
   const email=$("eEmail").value.trim();
-  if(!/^\S+@\S+\.\S+$/.test(email)) return $("errE").textContent="Escribe primero tu correo arriba.";
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return $("errE").textContent="Para recuperar la contraseña escribe arriba tu correo (no tu @).";
   const { error } = await sb.auth.resetPasswordForEmail(email,{ redirectTo: location.origin+location.pathname });
   $("errE").textContent = error ? errMsg(error) : "";
   if(!error) toast("Te hemos mandado un correo para cambiar la contraseña");
