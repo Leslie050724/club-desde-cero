@@ -160,37 +160,208 @@ label small{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
 .invita h4{margin:0 0 4px}
 .invita-link{background:var(--fondo);border:1px solid var(--linea);border-radius:6px;padding:10px;overflow-x:auto}
 .invita-link code{font-family:var(--mono);font-size:13px;white-space:nowrap}
+
+/* ===== DISEÑO ESTADIO =====
+   Layout: noche de partido. Estadio a pantalla completa arriba (césped, focos, marcador LED),
+   cinta de anuncios tipo valla publicitaria, y debajo la grada con las secciones. El club sigue
+   en blanco y negro (aún no tiene colores); el verde es el césped, no el club. */
+:root{
+  --fondo:#0a0d0b; --panel:#121814; --panel2:#18201a; --linea:#26312a;
+  --texto:#f3f4ef; --gris:#9aa39c; --tiza:#f1f2ec; --verde:#3fd17f; --rojo:#ff4d4f;
+  --cesped:#13532f; --cesped2:#0e4426; --oro:#e8b84a; --plata:#c7ccd2; --bronce:#cd8b54;
+}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(1200px 600px at 50% -10%,#14301f 0%,transparent 60%),var(--fondo);overflow-x:clip}
+.wrap{gap:44px;padding-top:36px}
+
+/* --- estadio --- */
+.estadio{position:relative;overflow:hidden;margin-left:calc(-1*max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1*max(16px,env(safe-area-inset-right,0px)));
+  background:radial-gradient(900px 420px at 50% 0%,rgba(255,255,255,.10),transparent 70%),linear-gradient(180deg,#07100a 0%,#0b1a10 55%,#0f3a22 100%);border-bottom:4px solid var(--tiza)}
+.estadio-in{position:relative;z-index:2;max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:26px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 120px}
+.cesped{position:absolute;left:-20%;right:-20%;bottom:-40px;height:260px;z-index:0;transform:perspective(520px) rotateX(58deg);transform-origin:50% 100%;
+  background:repeating-linear-gradient(90deg,var(--cesped) 0 70px,var(--cesped2) 70px 140px);box-shadow:0 -40px 80px rgba(0,0,0,.6) inset}
+.cesped svg{position:absolute;inset:0;width:100%;height:100%}
+.focos{position:absolute;inset:0;z-index:1;pointer-events:none}
+.focos i{position:absolute;top:-80px;width:340px;height:620px;background:linear-gradient(180deg,rgba(255,255,240,.22),rgba(255,255,240,0) 75%);filter:blur(6px);clip-path:polygon(42% 0,58% 0,100% 100%,0 100%)}
+.focos i:first-child{left:-60px;transform:rotate(-24deg);transform-origin:50% 0}
+.focos i:last-child{right:-60px;transform:rotate(24deg);transform-origin:50% 0}
+header{padding-top:18px}
+.logo{display:flex;align-items:center;gap:10px;font-size:24px;letter-spacing:.02em;white-space:nowrap;line-height:1}
+.logo-ball{width:28px;height:28px;display:inline-block}
+.logo-ball svg,.balon-rueda svg{width:100%;height:100%;display:block}
+.hero{gap:24px;margin-top:10px}
+.escudo{width:112px;height:132px;background:linear-gradient(160deg,#5a625c,#2a302c);overflow:hidden;filter:drop-shadow(0 10px 30px rgba(0,0,0,.6))}
+.escudo::before{inset:6px;background:linear-gradient(180deg,#141a16,#0a0d0b)}
+.escudo::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg)}
+.escudo span{font-size:58px;color:var(--tiza);text-shadow:0 0 18px rgba(255,255,255,.35)}
+.dia{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);color:var(--tiza);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:5px 12px;letter-spacing:.08em;backdrop-filter:blur(4px)}
+.live{width:8px;height:8px;border-radius:50%;background:var(--rojo);box-shadow:0 0 0 0 rgba(255,77,79,.7)}
+.hero h1{font-size:clamp(44px,10.5vw,80px);line-height:.9;text-shadow:0 4px 30px rgba(0,0,0,.6)}
+.hero h1 .w{display:inline-block;white-space:nowrap}
+.hero h1 u{box-shadow:inset 0 -.2em 0 rgba(255,255,255,.25)}
+.hero h1 .tod{color:var(--verde);text-shadow:0 0 24px rgba(63,209,127,.45)}
+.intro{color:#c9d0ca;margin:0;font-size:19px}
+.ctas{margin-top:0}
+.btn{border-radius:999px;padding:12px 22px;letter-spacing:.01em;position:relative;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.btn:not([disabled]):hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.45),0 0 0 3px rgba(255,255,255,.12)}
+.btn:not(.sec)::after{content:"";position:absolute;top:0;left:-70%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);transform:skewX(-20deg);transition:left .5s ease}
+.btn:not(.sec):hover::after{left:130%}
+.btn.sec{background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 2px rgba(255,255,255,.28)}
+.btn.grande{font-size:17px;padding:15px 26px}
+.btn.peligro{background:var(--rojo)}
+
+/* --- marcador LED --- */
+.marcador{background:linear-gradient(180deg,#050806,#0b100c);border:2px solid #2c3530;border-radius:14px;padding:14px 6px;box-shadow:0 20px 50px rgba(0,0,0,.6),inset 0 0 0 4px #000;gap:0}
+.marcador .stat{border:0;padding:0 8px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.marcador .stat+.stat{border-left:1px dashed #2c3530}
+.marcador .stat span{order:0;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8a948c}
+.marcador .stat b{font-size:clamp(28px,8vw,44px);color:#fbffe9;text-shadow:0 0 10px rgba(240,255,200,.55),0 0 2px #fff;letter-spacing:.04em}
+
+/* --- balón --- */
+.balon-rueda{position:absolute;z-index:2;bottom:22px;left:-60px;width:44px;height:44px;filter:drop-shadow(0 8px 6px rgba(0,0,0,.55))}
+
+/* --- cinta tipo valla --- */
+.ticker{margin-left:calc(-1*max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1*max(16px,env(safe-area-inset-right,0px)));background:var(--tiza);color:#0a0d0b;overflow:hidden;white-space:nowrap;border-bottom:2px solid #0a0d0b}
+.ticker-in{display:inline-flex}
+.ticker span{font-family:var(--display);font-weight:900;font-size:20px;letter-spacing:.06em;padding:9px 0}
+
+/* --- secciones --- */
+h2{font-size:clamp(34px,7vw,46px);letter-spacing:.01em;display:flex;flex-direction:column;gap:8px}
+h2::after{content:"";height:3px;width:120px;background:radial-gradient(circle at 50% 50%,transparent 7px,var(--tiza) 7px 9px,transparent 9px),linear-gradient(90deg,var(--tiza),var(--tiza)) center/100% 2px no-repeat;opacity:.55}
+.sub{font-size:16px}
+
+/* pizarra de votación */
+.voto{position:relative;overflow:hidden;border:2px solid rgba(255,255,255,.85);border-radius:18px;padding:24px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Cg fill='none' stroke='white' stroke-opacity='.07' stroke-width='3'%3E%3Crect x='10' y='10' width='580' height='380'/%3E%3Cline x1='300' y1='10' x2='300' y2='390'/%3E%3Ccircle cx='300' cy='200' r='60'/%3E%3Crect x='10' y='110' width='80' height='180'/%3E%3Crect x='510' y='110' width='80' height='180'/%3E%3C/g%3E%3C/svg%3E") center/cover,
+  linear-gradient(160deg,#123d26,#0c2a1a);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.voto .dia{background:var(--tiza);color:#0a0d0b;border:0}
+.cierra{background:#050806;color:#fbffe9;border-radius:8px;padding:4px 10px;text-shadow:0 0 8px rgba(240,255,200,.5)}
+.voto h3{font-size:clamp(34px,9vw,52px);text-shadow:0 3px 20px rgba(0,0,0,.5)}
+.voto input{background:rgba(0,0,0,.35);border-color:rgba(255,255,255,.25)}
+.voto .nota{color:#c5d6ca}
+
+/* filas de ranking */
+.rank{gap:8px}
+.row{background:linear-gradient(90deg,var(--panel2),var(--panel));border:1px solid var(--linea);border-radius:12px;padding:12px 14px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.row:hover{transform:translateX(4px);border-color:rgba(255,255,255,.3);box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.voto .row{background:rgba(0,0,0,.35);border-color:rgba(255,255,255,.12)}
+.row .p{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;background:#0a0d0b;border:1px solid var(--linea);color:var(--gris)}
+.rank > .row:nth-child(1) .p{background:var(--oro);border-color:var(--oro);color:#1a1405;box-shadow:0 0 14px rgba(232,184,74,.55)}
+.rank > .row:nth-child(2) .p{background:var(--plata);border-color:var(--plata);color:#15171a}
+.rank > .row:nth-child(3) .p{background:var(--bronce);border-color:var(--bronce);color:#1a0f06}
+.bar{height:6px;background:#0a0d0b}
+.bar i{background:linear-gradient(90deg,var(--cesped),var(--verde));box-shadow:0 0 10px rgba(63,209,127,.5)}
+.vacio{border:2px dashed rgba(255,255,255,.18);border-radius:14px;background:rgba(0,0,0,.2)}
+
+/* ficha del club tipo cromo */
+.ficha{gap:12px}
+.dato{border:1px solid var(--linea);border-radius:14px;padding:16px;background:linear-gradient(180deg,var(--panel2),var(--panel));position:relative;overflow:hidden;transition:transform .2s ease}
+.dato:hover{transform:translateY(-3px)}
+.dato::after{content:"?";position:absolute;right:10px;bottom:-14px;font-family:var(--display);font-weight:900;font-size:72px;color:rgba(255,255,255,.05)}
+.dato.hoy{border:2px solid var(--tiza);background:linear-gradient(160deg,#173a26,#0e2418)}
+.dato.hoy::after{content:"⚽";font-size:52px;bottom:-6px;opacity:.25;color:inherit}
+
+/* metas como tabla de clasificación */
+.meta{padding:14px 0}
+.meta .st{width:30px;height:30px}
+.meta.now .st{box-shadow:0 0 0 6px rgba(255,255,255,.08)}
+
+/* puntos */
+.pt{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--linea);border-radius:14px;padding:16px;transition:transform .2s ease,border-color .2s ease}
+.pts-grid{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+.pt:hover{transform:translateY(-3px);border-color:rgba(63,209,127,.5)}
+.pt b{font-size:26px;text-shadow:0 0 12px rgba(63,209,127,.35)}
+
+/* paneles */
+.alta{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--linea);border-radius:18px;padding:24px;position:relative;overflow:hidden}
+.alta::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,transparent,var(--tiza),transparent);opacity:.6}
+input,select{border-radius:10px;background:#0a0d0b;transition:border-color .15s ease,box-shadow .15s ease}
+input:focus,select:focus{outline:none;border-color:var(--tiza);box-shadow:0 0 0 4px rgba(255,255,255,.1)}
+.tabs button[aria-selected="true"]{border-bottom-color:var(--verde)}
+
+/* carnet de socio holográfico */
+.carnet{position:relative;overflow:hidden;border-radius:18px;padding:20px;max-width:440px;
+  background:repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 26px,transparent 26px 52px),linear-gradient(135deg,#f6f6f1,#dfe2da);box-shadow:0 18px 40px rgba(0,0,0,.5)}
+.carnet::after{content:"";position:absolute;top:-50%;left:-80%;width:60%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),rgba(180,255,220,.35),transparent);transform:rotate(20deg)}
+.carnet .u{font-size:32px}
+
+/* aparición al hacer scroll */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+
+/* celebración de gol */
+.gol{position:fixed;inset:0;z-index:40;display:grid;place-items:center;pointer-events:none;background:radial-gradient(circle,rgba(0,0,0,.55),rgba(0,0,0,.2))}
+.gol b{font-family:var(--display);font-weight:900;font-size:clamp(64px,20vw,180px);color:var(--tiza);text-shadow:0 0 40px rgba(63,209,127,.8),0 8px 0 #0a0d0b;letter-spacing:.02em;text-align:center;line-height:.9}
+.gol small{display:block;font-family:var(--body);font-size:20px;font-weight:700;color:var(--verde);text-shadow:none;letter-spacing:0;margin-top:10px}
+.gol canvas{position:absolute;inset:0;width:100%;height:100%}
+
+@media (prefers-reduced-motion:no-preference){
+  .focos i:first-child{animation:foco1 7s ease-in-out infinite alternate}
+  .focos i:last-child{animation:foco2 8s ease-in-out infinite alternate}
+  .escudo::after{animation:brillo 4.5s ease-in-out infinite}
+  .live{animation:pulso 1.6s ease-out infinite}
+  .hero h1 .w{animation:subir .7s cubic-bezier(.2,.8,.2,1) both}
+  .hero h1 .w:nth-child(2){animation-delay:.08s}.hero h1 .w:nth-child(3){animation-delay:.16s}.hero h1 .w:nth-child(4){animation-delay:.24s}.hero h1 .w:nth-child(5){animation-delay:.5s}
+  .logo-ball{animation:girar 6s linear infinite}
+  .balon-rueda{animation:rodar 14s linear infinite}
+  .balon-rueda svg{animation:girar 1.4s linear infinite}
+  .ticker-in{animation:cinta 32s linear infinite}
+  .carnet::after{animation:holo 5s ease-in-out infinite}
+  .gol b{animation:golazo .9s cubic-bezier(.2,1.4,.3,1) both}
+}
+@keyframes foco1{to{transform:rotate(-14deg)}}
+@keyframes foco2{to{transform:rotate(14deg)}}
+@keyframes brillo{0%,60%{left:-60%}100%{left:140%}}
+@keyframes pulso{0%{box-shadow:0 0 0 0 rgba(255,77,79,.7)}100%{box-shadow:0 0 0 10px rgba(255,77,79,0)}}
+@keyframes subir{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+@keyframes girar{to{transform:rotate(360deg)}}
+@keyframes rodar{0%{left:-60px}100%{left:calc(100% + 60px)}}
+@keyframes cinta{to{transform:translateX(-50%)}}
+@keyframes holo{0%,55%{left:-80%}100%{left:140%}}
+@keyframes golazo{0%{transform:scale(.2) rotate(-8deg);opacity:0}60%{transform:scale(1.1) rotate(2deg);opacity:1}100%{transform:scale(1)}}
+@media (max-width:520px){.logo{font-size:19px}.logo-ball{width:22px;height:22px}.btn{padding:10px 16px}.escudo{width:84px;height:100px}.escudo span{font-size:44px}.estadio-in{padding-bottom:100px}.focos i{width:220px}}
 </style>
 </head>
 <body>
+<div class="estadio">
+  <div class="focos" aria-hidden="true"><i></i><i></i></div>
+  <div class="cesped" aria-hidden="true">
+    <svg viewBox="0 0 600 400" preserveAspectRatio="none"><g fill="none" stroke="rgba(255,255,255,.55)" stroke-width="3"><rect x="20" y="20" width="560" height="360"/><line x1="300" y1="20" x2="300" y2="380"/><circle cx="300" cy="200" r="60"/><circle cx="300" cy="200" r="4" fill="rgba(255,255,255,.7)"/><rect x="20" y="110" width="80" height="180"/><rect x="500" y="110" width="80" height="180"/><rect x="20" y="160" width="28" height="80"/><rect x="552" y="160" width="28" height="80"/></g></svg>
+  </div>
+  <div class="estadio-in">
+    <header>
+      <div class="logo"><span class="logo-ball"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="#f4f4ef" stroke="#111" stroke-width="3"/><polygon points="50,30 69,44 62,66 38,66 31,44" fill="#111"/><path d="M50 30V8M69 44l20-8M62 66l13 18M38 66L25 84M31 44l-20-8" stroke="#111" stroke-width="3" fill="none"/><path d="M38 9l12-1 12 1M84 27l6 12-1 13M86 69l-8 11-11 6M33 91l-12-6-8-11M10 52l-1-13 6-12" stroke="#111" stroke-width="6" fill="none" stroke-linecap="round"/></svg></span>Club desde Cero</div>
+      <div class="hdr-btns">
+        <button class="btn sec" type="button" id="btnEntrar" data-go="alta">Entrar</button>
+        <button class="btn" type="button" id="btnPerfil" data-go="perfil" hidden>Mi perfil</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="escudo" aria-hidden="true"><span>?</span></div>
+      <div>
+        <span class="dia"><i class="live"></i>DÍA 0 · EN DIRECTO</span>
+        <h1><span class="w">Un club</span> <span class="w">sin nombre,</span> <span class="w">sin colores</span> <span class="w">y <u>sin socios</u>.</span> <span class="w tod">Todavía.</span></h1>
+      </div>
+    </section>
+    <p class="intro">Vamos a crear un club de fútbol desde cero entre todos. Cada día votamos una cosa: el nombre, los colores, el estadio, los fichajes. Hazte socio y suma puntos para tu país y tu provincia.</p>
+    <div class="ctas">
+      <button class="btn grande" type="button" data-go="voto">⚽ Proponer un nombre</button>
+      <button class="btn sec grande" type="button" data-go="alta" id="ctaSocio">Ser de los primeros</button>
+    </div>
+
+    <div class="marcador stats" role="group" aria-label="Marcador del club">
+      <div class="stat"><span>Socios</span><b id="sSoc">–</b></div>
+      <div class="stat"><span>Países</span><b id="sPai">–</b></div>
+      <div class="stat"><span>Apoyos</span><b id="sVot">–</b></div>
+    </div>
+  </div>
+  <div class="balon-rueda" aria-hidden="true"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="#f4f4ef" stroke="#111" stroke-width="3"/><polygon points="50,30 69,44 62,66 38,66 31,44" fill="#111"/><path d="M50 30V8M69 44l20-8M62 66l13 18M38 66L25 84M31 44l-20-8" stroke="#111" stroke-width="3" fill="none"/><path d="M38 9l12-1 12 1M84 27l6 12-1 13M86 69l-8 11-11 6M33 91l-12-6-8-11M10 52l-1-13 6-12" stroke="#111" stroke-width="6" fill="none" stroke-linecap="round"/></svg></div>
+</div>
+<div class="ticker" aria-hidden="true"><div class="ticker-in"><span>DÍA 0 · PROPÓN EL NOMBRE DEL CLUB · LOS 2 MÁS APOYADOS VAN A LA FINAL · CADA SEGUIDOR ES UN SOCIO · INVITA A TUS AMIGOS Y GANA +15 · </span><span>DÍA 0 · PROPÓN EL NOMBRE DEL CLUB · LOS 2 MÁS APOYADOS VAN A LA FINAL · CADA SEGUIDOR ES UN SOCIO · INVITA A TUS AMIGOS Y GANA +15 · </span></div></div>
+
 <div class="wrap">
-  <header>
-    <div class="logo">Club desde Cero</div>
-    <div class="hdr-btns">
-      <button class="btn sec" type="button" id="btnEntrar" data-go="alta">Entrar</button>
-      <button class="btn" type="button" id="btnPerfil" data-go="perfil" hidden>Mi perfil</button>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="escudo" aria-hidden="true"><span>?</span></div>
-    <div>
-      <span class="dia">DÍA 0</span>
-      <h1>Un club sin nombre, sin colores y <u>sin socios</u>. Todavía.</h1>
-    </div>
-  </section>
-  <p class="intro">Vamos a crear un club de fútbol desde cero entre todos. Cada día votamos una cosa: el nombre, los colores, el estadio, los fichajes. Hazte socio y suma puntos para tu país y tu provincia.</p>
-  <div class="ctas">
-    <button class="btn" type="button" data-go="voto">Proponer un nombre</button>
-    <button class="btn sec" type="button" data-go="alta" id="ctaSocio">Ser de los primeros</button>
-  </div>
-
-  <div class="stats">
-    <div class="stat"><b id="sSoc">–</b><span>socios</span></div>
-    <div class="stat"><b id="sPai">–</b><span>países</span></div>
-    <div class="stat"><b id="sVot">–</b><span>apoyos</span></div>
-  </div>
-
   <!-- MI PERFIL -->
   <section class="alta" id="perfil" hidden>
     <div class="perfil-top">
@@ -446,7 +617,7 @@ let usuario = null, perfil = null, abierto = null, recuperando = false;
 async function cargarStats(){
   const { data } = await sb.from("v_stats").select("*").single();
   if(!data) return;
-  $("sSoc").textContent=fmt(data.socios); $("sPai").textContent=fmt(data.paises); $("sVot").textContent=fmt(data.apoyos);
+  contar($("sSoc"),data.socios); contar($("sPai"),data.paises); contar($("sVot"),data.apoyos);
 }
 let provData = [];
 async function cargarRanking(){
@@ -521,7 +692,7 @@ $("fNom").addEventListener("submit", async e=>{
   if(n.length<3){ $("errNom").textContent="Escribe un nombre de al menos 3 letras."; return; }
   const { error } = await sb.rpc("proponer_nombre",{ p_nombre:n });
   if(error){ $("errNom").textContent=errMsg(error); return; }
-  $("errNom").textContent=""; $("nom").value=""; toast("Propuesta guardada · +10 puntos");
+  $("errNom").textContent=""; $("nom").value=""; toast("Propuesta guardada · +10 puntos"); gol("¡GOOOL!","Tu nombre ya está en juego · +10");
   await cargarPerfil(); refrescarPublico();
 });
 
@@ -589,7 +760,7 @@ $("fCompletar").addEventListener("submit", async e=>{
   if(!prov) return $("errC").textContent="Elige o escribe tu provincia.";
   const { error } = await sb.rpc("hacerse_socio",{ p_ig:ig, p_pais:pais, p_provincia:prov, p_ref:REF });
   if(error) return $("errC").textContent = /duplicate|unique/i.test(error.message) ? "Ese @ ya es socio." : errMsg(error);
-  toast("¡Ya eres socio!"); await cargarPerfil(); refrescarPublico();
+  toast("¡Ya eres socio!"); gol("¡FICHADO!","Ya eres socio del club"); await cargarPerfil(); refrescarPublico();
 });
 
 /* ---------- alta ---------- */
@@ -622,7 +793,7 @@ $("fAlta").addEventListener("submit", async e=>{
     try{ localStorage.removeItem("club_ref"); }catch(_){}
     const { error:e3 } = await sb.rpc("hacerse_socio",{ p_ig:ig, p_pais:pais, p_provincia:prov, p_ref:REF });
     if(e3) throw e3;
-    toast("¡Bienvenido al club!");
+    toast("¡Bienvenido al club!"); gol("¡FICHADO!","Ya eres socio del club");
     usuario = data.session.user; await cargarPerfil(); refrescarPublico();
     $("perfil").scrollIntoView({behavior:"smooth"});
   }catch(x){ err.textContent=errMsg(x); }
@@ -770,6 +941,33 @@ $("compartir").addEventListener("click", async ()=>{
   if(navigator.share){ try{ await navigator.share({ title:"Club desde Cero", text:texto, url }); return; }catch(e){ if(e.name==="AbortError") return; } }
   copiarTexto(url,$("pLink"));
 });
+
+
+/* ---------- efectos ---------- */
+const SIN_MOV = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function contar(el, n){
+  n=Number(n||0); const desde=Number(el.dataset.v||0); el.dataset.v=n;
+  if(SIN_MOV || desde===n){ el.textContent=fmt(n); return; }
+  const t0=performance.now(), dur=900;
+  (function paso(t){ const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3); el.textContent=fmt(Math.round(desde+(n-desde)*e)); if(k<1) requestAnimationFrame(paso); })(t0);
+}
+function gol(titulo, sub){
+  const d=document.createElement("div"); d.className="gol";
+  d.innerHTML=`<canvas></canvas><b>${titulo}<small>${sub||""}</small></b>`;
+  document.body.appendChild(d);
+  if(!SIN_MOV){
+    const c=d.querySelector("canvas"), x=c.getContext("2d"); c.width=innerWidth; c.height=innerHeight;
+    const cols=["#f1f2ec","#3fd17f","#e8b84a","#ffffff","#13532f"];
+    const ps=Array.from({length:160},()=>({x:c.width/2,y:c.height*.55,vx:(Math.random()-.5)*16,vy:-Math.random()*16-4,r:Math.random()*6+3,c:cols[Math.floor(Math.random()*cols.length)],a:Math.random()*6}));
+    const t0=performance.now();
+    (function f(t){ x.clearRect(0,0,c.width,c.height); ps.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.a+=.2;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.6);x.restore();}); if(t-t0<2200) requestAnimationFrame(f); })(t0);
+  }
+  setTimeout(()=>d.remove(), SIN_MOV?1400:2300);
+}
+if(!SIN_MOV && "IntersectionObserver" in window){
+  const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } }),{threshold:.12});
+  document.querySelectorAll(".wrap > section, .wrap > footer").forEach(s=>{ s.classList.add("rv"); io.observe(s); });
+}
 
 /* ---------- reloj y arranque ---------- */
 const CIERRE_DIA = new Date("2026-11-10T19:30:00Z"); // 19:30 en Canarias (cambia esta fecha cada día)
