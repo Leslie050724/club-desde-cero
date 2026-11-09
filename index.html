@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Club desde Cero</title>
+<meta name="description" content="Un club de fútbol creado entre todos. Cada seguidor es un socio y cada día votamos algo nuevo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap">
+<style>
+/* Layout: Día 0. El club aún no tiene colores, así que la web es en escala de grises (como una camiseta sin estampar). Votación del día al centro, ficha vacía con "?", ranking de países y provincias que se llena solo */
+:root{
+  --fondo:#14161a; --panel:#1d2026; --linea:#30343c;
+  --texto:#f1f1ee; --gris:#9a9ea6; --tiza:#e8e8e3; --verde:#4cc38a; --rojo:#e5484d;
+  --display:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif;
+  --body:"Barlow",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--fondo);color:var(--texto);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+header{display:flex;justify-content:space-between;align-items:center;padding-top:16px;gap:12px}
+.logo{font-family:var(--display);font-weight:900;font-size:22px;text-transform:uppercase}
+.btn{font-family:var(--body);font-weight:700;font-size:15px;border:0;border-radius:6px;padding:12px 18px;cursor:pointer;background:var(--tiza);color:var(--fondo)}
+.btn.sec{background:transparent;color:var(--texto);box-shadow:inset 0 0 0 2px var(--linea)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,.opt:focus-visible,.row:focus-visible{outline:3px solid var(--texto);outline-offset:2px}
+h2{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:34px;margin:0 0 4px}
+.sub{color:var(--gris);margin:0 0 14px}
+.dia{display:inline-block;font-family:var(--mono);font-size:13px;background:var(--tiza);color:var(--fondo);padding:3px 8px;border-radius:4px}
+/* hero */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.escudo{width:96px;height:112px;background:var(--linea);clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%);display:grid;place-items:center;position:relative}
+.escudo::before{content:"";position:absolute;inset:5px;background:var(--fondo);clip-path:inherit}
+.escudo span{position:relative;font-family:var(--display);font-weight:900;font-size:48px;color:var(--gris);margin-top:-14px}
+.hero h1{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:clamp(40px,10vw,72px);line-height:.92;margin:8px 0 0;text-wrap:balance}
+.hero h1 u{text-decoration:none;box-shadow:inset 0 -.18em 0 var(--linea)}
+.intro{color:var(--gris);font-size:18px;margin:-12px 0 0;max-width:54ch}
+.ctas{display:flex;gap:10px;flex-wrap:wrap;margin-top:-12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{border-top:2px solid var(--linea);padding-top:8px}
+.stat b{display:block;font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--gris)}
+/* votacion */
+.voto{background:var(--panel);border:2px solid var(--tiza);border-radius:12px;padding:20px}
+.voto .top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+.cierra{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.voto h3{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:clamp(30px,8vw,44px);line-height:1;margin:6px 0 16px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{position:relative;overflow:hidden;background:var(--fondo);border:2px solid var(--linea);border-radius:10px;padding:18px 12px;text-align:center;cursor:pointer;color:var(--texto);font:inherit}
+.opt:hover{border-color:var(--gris)}
+.opt b{display:block;font-family:var(--display);font-size:28px;text-transform:uppercase;position:relative;line-height:1}
+.opt small{display:block;color:var(--gris);font-size:13px;position:relative;margin-top:4px}
+.opt .pct{font-family:var(--mono);font-size:20px;position:relative;margin-top:6px}
+.opt .fill{position:absolute;left:0;bottom:0;width:100%;background:rgba(232,232,227,.1);height:0}
+.opt.mio{border-color:var(--tiza)}
+.voto .nota{margin:14px 0 0;font-size:14px;color:var(--gris)}
+@media (prefers-reduced-motion:no-preference){.opt .fill,.bar i{transition:all .7s ease}}
+/* club */
+.ficha{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.dato{border:1px dashed var(--linea);border-radius:8px;padding:12px;min-width:0}
+.dato .k{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--gris)}
+.dato .v{font-weight:700;font-size:18px;color:var(--gris)}
+.dato .d{font-family:var(--mono);font-size:12px;color:var(--gris)}
+.dato.hoy{border:2px solid var(--tiza)}
+.dato.hoy .v{color:var(--texto)}
+.nomForm{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+@media (max-width:460px){.nomForm{grid-template-columns:1fr}}
+.row .btn[disabled]{opacity:.6;cursor:default}
+/* metas */
+.metas{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.meta{display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--linea)}
+.meta .st{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;border:2px solid var(--linea);color:var(--gris)}
+.meta.now .st{background:var(--tiza);border-color:var(--tiza);color:var(--fondo)}
+.meta b{display:block}
+.meta span{font-size:14px;color:var(--gris)}
+.meta .n{font-family:var(--mono);font-size:14px;color:var(--gris);font-variant-numeric:tabular-nums;text-align:right}
+/* ranking */
+.rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.row{display:grid;grid-template-columns:24px 28px 1fr auto;gap:10px;align-items:center;background:var(--panel);border-radius:8px;padding:10px 12px;cursor:pointer;border:1px solid transparent}
+.row:hover,.row.sel{border-color:var(--linea)}
+.row .p{font-family:var(--mono);color:var(--gris)}
+.row .fl{font-size:22px;line-height:1}
+.row .nm{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .s{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.row .s small{display:block;font-family:var(--body);font-size:12px;color:var(--gris)}
+.provs{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;padding-top:6px}
+.prov{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:14px}
+.prov span:last-child{font-family:var(--mono);color:var(--gris)}
+.bar{grid-column:1/-1;height:4px;background:var(--linea);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--tiza)}
+.vacio{border:1px dashed var(--linea);border-radius:10px;padding:28px 16px;text-align:center;color:var(--gris)}
+.vacio b{display:block;font-family:var(--display);font-size:26px;text-transform:uppercase;color:var(--texto)}
+/* puntos */
+.pts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.pt{background:var(--panel);border-radius:8px;padding:12px}
+.pt b{font-family:var(--mono);color:var(--verde);font-size:20px}
+.pt p{margin:4px 0 0;font-size:14px;color:var(--gris)}
+/* alta */
+.alta{background:var(--panel);border-radius:12px;padding:20px}
+.alta form{display:grid;gap:12px}
+label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:grid;gap:4px;color:var(--gris)}
+input,select{font:inherit;font-size:16px;padding:12px;border:2px solid var(--linea);border-radius:6px;background:var(--fondo);color:var(--texto);width:100%}
+.err{font-size:14px;color:var(--rojo);min-height:20px}
+.carnet{margin-top:18px;background:var(--tiza);color:#14161a;border-radius:14px;padding:18px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;max-width:420px}
+.carnet .mini{width:56px;height:66px;background:#14161a;clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%);display:grid;place-items:center;font-family:var(--display);font-weight:900;color:#e8e8e3;font-size:28px}
+.carnet .mini span{margin-top:-8px}
+.carnet .t{font-size:12px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.carnet .u{font-family:var(--display);font-weight:900;font-size:28px;line-height:1;text-transform:uppercase;overflow-wrap:anywhere}
+.carnet .c{font-family:var(--mono);font-size:22px;margin-top:6px}
+.carnet .n{font-size:14px}
+.tras{margin-top:12px;color:var(--gris);font-size:15px;max-width:52ch}
+.tras b{color:var(--texto)}
+.ok{font-size:14px;color:var(--verde);min-height:20px}
+footer{color:var(--gris);font-size:13px;text-align:center}
+.check{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;text-transform:none;letter-spacing:0;font-weight:500;font-size:14px;color:var(--gris)}
+.check input{width:22px;height:22px;margin:0;accent-color:var(--tiza)}
+.check a,.priv a{color:var(--texto)}
+.priv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 24px}
+.priv-grid>div{min-width:0}
+.priv-grid h4{font-size:20px;margin:0 0 4px}
+.priv-grid p{margin:0;color:var(--gris);font-size:15px}
+@media (max-width:560px){.priv-grid{grid-template-columns:1fr}}
+@media (max-width:520px){.hero{grid-template-columns:1fr}.escudo{width:72px;height:84px}.escudo span{font-size:36px}}
+@media (max-width:380px){.ficha{grid-template-columns:1fr}.stat b{font-size:18px}}
+
+body{margin:0}
+html{-webkit-text-size-adjust:100%}
+a{color:var(--texto)}
+.hdr-btns{display:flex;gap:8px}
+.form{display:grid;gap:12px}
+label small{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
+.tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--linea)}
+.tabs button{font:inherit;font-weight:700;background:none;border:0;color:var(--gris);padding:10px 12px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tabs button[aria-selected="true"]{color:var(--texto);border-bottom-color:var(--tiza)}
+.link{background:none;border:0;color:var(--gris);text-decoration:underline;font:inherit;font-size:14px;cursor:pointer;justify-self:start;padding:0}
+.perfil-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.perfil-datos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.perfil-datos b{display:block;font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums}
+.perfil-datos span{font-size:13px;color:var(--gris)}
+.mini-btn{padding:6px 12px}
+.row .btn[disabled]{opacity:.6;cursor:default}
+.nm small.fin{color:var(--verde);font-weight:600}
+.nm small.autor{display:block;color:var(--gris);font-weight:500;font-size:12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--tiza);color:var(--fondo);font-weight:700;padding:12px 18px;border-radius:8px;z-index:20;max-width:calc(100% - 32px);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">Club desde Cero</div>
+    <div class="hdr-btns">
+      <button class="btn sec" type="button" id="btnEntrar" data-go="alta">Entrar</button>
+      <button class="btn" type="button" id="btnPerfil" data-go="perfil" hidden>Mi perfil</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="escudo" aria-hidden="true"><span>?</span></div>
+    <div>
+      <span class="dia">DÍA 0</span>
+      <h1>Un club sin nombre, sin colores y <u>sin socios</u>. Todavía.</h1>
+    </div>
+  </section>
+  <p class="intro">Vamos a crear un club de fútbol desde cero entre todos. Cada día votamos una cosa: el nombre, los colores, el estadio, los fichajes. Hazte socio y suma puntos para tu país y tu provincia.</p>
+  <div class="ctas">
+    <button class="btn" type="button" data-go="voto">Proponer un nombre</button>
+    <button class="btn sec" type="button" data-go="alta" id="ctaSocio">Ser de los primeros</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="sSoc">–</b><span>socios</span></div>
+    <div class="stat"><b id="sPai">–</b><span>países</span></div>
+    <div class="stat"><b id="sVot">–</b><span>apoyos</span></div>
+  </div>
+
+  <!-- MI PERFIL -->
+  <section class="alta" id="perfil" hidden>
+    <div class="perfil-top">
+      <h2>Mi perfil</h2>
+      <button class="btn sec" type="button" id="salir">Salir</button>
+    </div>
+    <div class="carnet">
+      <div class="mini" aria-hidden="true"><span>?</span></div>
+      <div style="min-width:0"><div class="t" id="pTit"></div><div class="u" id="pUsr"></div><div class="c" id="pCod"></div><div class="n" id="pLug"></div></div>
+    </div>
+    <div class="perfil-datos">
+      <div><b id="pPts">0</b><span>puntos</span></div>
+      <div><b id="pRank">–</b><span>puesto</span></div>
+      <div><b id="pEst">–</b><span>carnet</span></div>
+    </div>
+    <p class="tras" id="pAct"></p>
+    <p class="tras" id="pProp"></p>
+    <button class="btn sec" type="button" id="copy">Copiar mi código</button>
+    <div class="ok" id="ok" role="status"></div>
+  </section>
+
+  <!-- COMPLETAR (cuenta creada pero sin carnet) -->
+  <section class="alta" id="completar" hidden>
+    <h2>Termina tu carnet</h2>
+    <p class="sub">Ya tienes cuenta. Solo falta tu @, tu país y tu provincia.</p>
+    <form id="fCompletar" class="form" novalidate></form>
+  </section>
+
+  <section class="voto" id="voto">
+    <div class="top"><span class="dia">DÍA 0 · PROPUESTAS</span><span class="cierra" id="cierra">Cierra en --:--:--</span></div>
+    <h3>¿Cómo se llama nuestro club?</h3>
+    <p class="nota" style="margin:-6px 0 14px">Cada socio propone <b>un nombre</b> y apoya hasta <b>3</b>. Los <b>2 más apoyados</b> pasan a la final del Día 1.</p>
+    <form id="fNom" class="nomForm" novalidate hidden>
+      <label for="nom">Tu propuesta<input id="nom" maxlength="30" placeholder="Ej: Deportivo Huracán" autocomplete="off"></label>
+      <button class="btn" type="submit">Proponer nombre</button>
+    </form>
+    <p class="nota" id="nomAviso"></p>
+    <div class="err" id="errNom" role="status"></div>
+    <div id="propBox"></div>
+    <p class="nota">También cuenta si lo comentas en el vídeo del Día 0 de <b>@club.desdecero</b> en Instagram.</p>
+  </section>
+
+  <section id="club">
+    <h2>Nuestro club</h2>
+    <p class="sub">Aquí irá apareciendo todo lo que decidan los socios.</p>
+    <div class="ficha">
+      <div class="dato hoy"><div class="k">Nombre</div><div class="v">Propuestas abiertas</div><div class="d">Día 0 propuestas · Día 1 final</div></div>
+      <div class="dato"><div class="k">Colores</div><div class="v">?</div><div class="d">Día 2</div></div>
+      <div class="dato"><div class="k">Escudo y mascota</div><div class="v">?</div><div class="d">Día 3</div></div>
+      <div class="dato"><div class="k">Ciudad</div><div class="v">?</div><div class="d">Día 4</div></div>
+      <div class="dato"><div class="k">Estadio</div><div class="v">🔒 1.000 socios</div><div class="d">Meta</div></div>
+      <div class="dato"><div class="k">Primer fichaje</div><div class="v">🔒 5.000 socios</div><div class="d">Meta</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Lo que se desbloquea</h2>
+    <p class="sub">Cada meta de socios abre votaciones nuevas.</p>
+    <ul class="metas">
+      <li class="meta now"><span class="st">1</span><div><b>Nombre, colores, escudo y ciudad</b><span>Hoy proponemos nombres, mañana la final</span></div><span class="n">0</span></li>
+      <li class="meta"><span class="st">2</span><div><b>El estadio</b><span>Tamaño, nombre y dónde se construye</span></div><span class="n">1.000</span></li>
+      <li class="meta"><span class="st">3</span><div><b>Primer fichaje y entrenador</b><span>Joven promesa o veterano</span></div><span class="n">5.000</span></li>
+      <li class="meta"><span class="st">4</span><div><b>Primer partido</b><span>Los socios eligen la alineación</span></div><span class="n">10.000</span></li>
+      <li class="meta"><span class="st">5</span><div><b>Himno y rival histórico</b><span>Sin pistas todavía</span></div><span class="n">25.000</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Ranking de países</h2>
+    <p class="sub">¿Qué país tendrá más socios? Toca un país para ver sus provincias.</p>
+    <div id="rankBox"></div>
+  </section>
+
+  <section>
+    <h2>Top socios</h2>
+    <p class="sub">Los que más puntos llevan.</p>
+    <div id="topBox"></div>
+  </section>
+
+  <section>
+    <h2>Cómo se suman puntos</h2>
+    <div class="pts-grid">
+      <div class="pt"><b>+10</b><p>Proponer un nombre para el club</p></div>
+      <div class="pt"><b>+5</b><p>Cada apoyo que das (hasta 3)</p></div>
+      <div class="pt"><b>+10</b><p>Activar tu carnet mandando tu código por DM</p></div>
+      <div class="pt"><b>★</b><p>Los 100 primeros socios serán Fundadores para siempre</p></div>
+    </div>
+  </section>
+
+  <!-- ALTA / ENTRAR -->
+  <section class="alta" id="alta">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabAlta" aria-selected="true">Hazte socio</button>
+      <button type="button" role="tab" id="tabEntrar" aria-selected="false">Ya soy socio</button>
+    </div>
+
+    <form id="fAlta" class="form" novalidate>
+      <p class="sub">Gratis. Crea tu cuenta y no perderás nunca tus puntos.</p>
+      <label for="ig">Tu @ de Instagram o TikTok<input id="ig" placeholder="@tu_usuario" autocomplete="username"></label>
+      <label for="email">Tu correo<input id="email" type="email" placeholder="tu@correo.com" autocomplete="email"><small>Para entrar y recuperar tu cuenta si olvidas la contraseña. Nunca se muestra.</small></label>
+      <label for="pass">Crea una contraseña<input id="pass" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><small>⚠️ No uses la contraseña de tu Instagram.</small></label>
+      <label for="pais">Tu país<select id="pais"></select></label>
+      <label for="prov" id="provLbl">Tu provincia o región<select id="prov" disabled><option value="">Primero elige tu país…</option></select></label>
+      <label for="provTxt" id="provTxtLbl" hidden>Tu provincia, estado o región<input id="provTxt" placeholder="Escríbela aquí" autocomplete="off"></label>
+      <label for="acepto" class="check"><input type="checkbox" id="acepto"><span>Tengo 14 años o más y he leído la <a href="#privacidad">privacidad</a>. Acepto que mi @, mi país y mi provincia salgan en la web y en los vídeos del club.</span></label>
+      <button class="btn" type="submit" id="bAlta">Crear mi carnet</button>
+      <div class="err" id="err" role="status"></div>
+    </form>
+
+    <form id="fEntrar" class="form" novalidate hidden>
+      <p class="sub">Entra para ver tus puntos y tu carnet.</p>
+      <label for="eEmail">Tu correo<input id="eEmail" type="email" autocomplete="email"></label>
+      <label for="ePass">Tu contraseña<input id="ePass" type="password" autocomplete="current-password"></label>
+      <button class="btn" type="submit">Entrar</button>
+      <button class="link" type="button" id="olvide">He olvidado mi contraseña</button>
+      <div class="err" id="errE" role="status"></div>
+    </form>
+
+    <form id="fNueva" class="form" novalidate hidden>
+      <p class="sub">Escribe tu nueva contraseña.</p>
+      <label for="nPass">Nueva contraseña<input id="nPass" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label>
+      <button class="btn" type="submit">Guardar contraseña</button>
+      <div class="err" id="errN" role="status"></div>
+    </form>
+  </section>
+
+  <section id="privacidad" class="priv">
+    <h2>Tu privacidad</h2>
+    <p class="sub">Explicado claro y corto, sin letra pequeña.</p>
+    <div class="priv-grid">
+      <div><h4>Qué te pedimos</h4><p>Tu @ de Instagram o TikTok, tu país, tu provincia, un correo y una contraseña. También guardamos el nombre que propones y tus apoyos. Nunca te pedimos teléfono ni datos bancarios.</p></div>
+      <div><h4>Tu contraseña</h4><p>Se guarda cifrada. Nadie puede verla, ni siquiera nosotros. Por favor, no uses la misma que en Instagram.</p></div>
+      <div><h4>Para qué se usa</h4><p>Solo para el juego: tu carnet, tus puntos, el ranking de países y provincias, las votaciones, y mencionarte en la web y en las publicaciones de @club.desdecero en Instagram y TikTok.</p></div>
+      <div><h4>Lo que es público</h4><p>Tu @, tu país, tu provincia y tus puntos se ven en la web. Tu correo y tu código de socio son privados y nunca se muestran.</p></div>
+      <div><h4>Lo que nunca hacemos</h4><p>No vendemos ni cedemos tus datos a nadie. No te mandamos publicidad. Tu correo solo se usa para entrar y recuperar tu cuenta.</p></div>
+      <div><h4>Borrar tus datos</h4><p>Escríbenos por mensaje directo a @club.desdecero con la palabra <b>BORRAR</b> y eliminamos tu cuenta y todo lo tuyo. También puedes pedirnos ver o corregir tus datos.</p></div>
+      <div><h4>Edad mínima</h4><p>Para hacerte socio tienes que tener 14 años o más.</p></div>
+      <div><h4>Dónde se guarda</h4><p>En servidores de Supabase en Europa.</p></div>
+    </div>
+    <p class="sub" style="margin-top:14px">Responsable: el equipo de @club.desdecero. Contacto: mensaje directo en Instagram. Última actualización: noviembre de 2026.</p>
+  </section>
+
+  <footer><a href="#privacidad">Privacidad</a> · Síguenos: <a href="https://www.instagram.com/club.desdecero/">Instagram @club.desdecero</a><br>Club desde Cero © 2026 · Un club inventado por sus seguidores.</footer>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = "https://hfifwigvumvxrnljubhk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_5yWCC5MruLVrLlpwAkC2KA_lAFp5t8x";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n || 0).toLocaleString("es-ES");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const errMsg = e => (e && (e.message || e.error_description)) || "Algo ha fallado. Inténtalo otra vez.";
+function toast(t){ const el=$("toast"); el.textContent=t; el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>el.hidden=true,3000); }
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>$(b.dataset.go).scrollIntoView({behavior:"smooth"})));
+
+/* ---------- países y provincias ---------- */
+const ISO="AF AL DE AD AO AG SA DZ AR AM AU AT AZ BS BD BB BH BE BZ BJ BY BO BA BW BR BN BG BF BI BT CV KH CM CA QA TD CL CN CY CO KM CG CD KP KR CI CR HR CU DK DM EC EG SV AE ER SK SI ES US EE SZ ET PH FI FJ FR GA GM GE GH GD GR GT GN GQ GW GY HT HN HU IN ID IQ IR IE IS MH SB IL IT JM JP JO KZ KE KG KI KW LA LS LV LB LR LY LI LT LU MK MG MY MW MV ML MT MA MU MR MX FM MD MC MN ME MZ MM NA NR NP NI NE NG NO NZ OM NL PK PW PS PA PG PY PE PL PT PR GB CF CZ DO RW RO RU WS KN SM VC LC ST SN RS SC SL SG SY SO LK ZA SD SS SE CH SR TH TW TZ TJ TL TG TO TT TN TM TR TV UA UG UY UZ VU VA VE VN YE DJ ZM ZW XK".split(" ");
+let dn=null;try{dn=new Intl.DisplayNames(["es"],{type:"region"})}catch(e){}
+const nombre=c=>{try{return dn?dn.of(c):c}catch(e){return c}};
+const bandera=c=>c==="XK"?"🏳️":String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt(0)));
+const paises=ISO.map(c=>({c,n:nombre(c)})).sort((a,b)=>a.n.localeCompare(b.n,"es"));
+
+const PROV={
+ ES:"A Coruña,Álava,Albacete,Alicante,Almería,Asturias,Ávila,Badajoz,Barcelona,Bizkaia,Burgos,Cáceres,Cádiz,Cantabria,Castellón,Ceuta,Ciudad Real,Córdoba,Cuenca,Gipuzkoa,Girona,Granada,Guadalajara,Huelva,Huesca,Illes Balears,Jaén,La Rioja,Las Palmas,León,Lleida,Lugo,Madrid,Málaga,Melilla,Murcia,Navarra,Ourense,Palencia,Pontevedra,Salamanca,Santa Cruz de Tenerife,Segovia,Sevilla,Soria,Tarragona,Teruel,Toledo,Valencia,Valladolid,Zamora,Zaragoza",
+ CU:"Pinar del Río,Artemisa,La Habana,Mayabeque,Matanzas,Cienfuegos,Villa Clara,Sancti Spíritus,Ciego de Ávila,Camagüey,Las Tunas,Holguín,Granma,Santiago de Cuba,Guantánamo,Isla de la Juventud",
+ MX:"Aguascalientes,Baja California,Baja California Sur,Campeche,Chiapas,Chihuahua,Ciudad de México,Coahuila,Colima,Durango,Estado de México,Guanajuato,Guerrero,Hidalgo,Jalisco,Michoacán,Morelos,Nayarit,Nuevo León,Oaxaca,Puebla,Querétaro,Quintana Roo,San Luis Potosí,Sinaloa,Sonora,Tabasco,Tamaulipas,Tlaxcala,Veracruz,Yucatán,Zacatecas",
+ AR:"Buenos Aires,Ciudad de Buenos Aires,Catamarca,Chaco,Chubut,Córdoba,Corrientes,Entre Ríos,Formosa,Jujuy,La Pampa,La Rioja,Mendoza,Misiones,Neuquén,Río Negro,Salta,San Juan,San Luis,Santa Cruz,Santa Fe,Santiago del Estero,Tierra del Fuego,Tucumán",
+ CO:"Amazonas,Antioquia,Arauca,Atlántico,Bogotá,Bolívar,Boyacá,Caldas,Caquetá,Casanare,Cauca,Cesar,Chocó,Córdoba,Cundinamarca,Guainía,Guaviare,Huila,La Guajira,Magdalena,Meta,Nariño,Norte de Santander,Putumayo,Quindío,Risaralda,San Andrés,Santander,Sucre,Tolima,Valle del Cauca,Vaupés,Vichada",
+ VE:"Amazonas,Anzoátegui,Apure,Aragua,Barinas,Bolívar,Carabobo,Cojedes,Delta Amacuro,Distrito Capital,Falcón,Guárico,La Guaira,Lara,Mérida,Miranda,Monagas,Nueva Esparta,Portuguesa,Sucre,Táchira,Trujillo,Yaracuy,Zulia"
+};
+for(const k in PROV)PROV[k]=PROV[k].split(",").sort((a,b)=>a.localeCompare(b,"es"));
+
+function rellenarPais(sel){ sel.innerHTML='<option value="">Elige tu país…</option>'+paises.map(p=>`<option value="${p.c}">${bandera(p.c)} ${p.n}</option>`).join(""); }
+function enlazarProvincia(selP, selR, lblR, lblTxt){
+  selP.addEventListener("change",()=>{
+    const l=PROV[selP.value];
+    lblR.hidden=!l && !!selP.value; lblTxt.hidden=!!l||!selP.value;
+    if(l){selR.disabled=false;selR.innerHTML='<option value="">Elige tu provincia…</option>'+l.map(x=>`<option>${x}</option>`).join("")}
+    else{selR.disabled=true;selR.innerHTML='<option value="">Primero elige tu país…</option>'}
+  });
+}
+rellenarPais($("pais")); enlazarProvincia($("pais"),$("prov"),$("provLbl"),$("provTxtLbl"));
+const leerProvincia = (selP, selR, txt) => PROV[selP.value] ? selR.value : txt.value.trim();
+const igValido = ig => /^[a-zA-Z0-9._]{2,30}$/.test(ig);
+const limpiarIg = s => s.trim().replace(/^@+/,"");
+
+/* ---------- estado ---------- */
+let usuario = null, perfil = null, abierto = null, recuperando = false;
+
+/* ---------- datos públicos ---------- */
+async function cargarStats(){
+  const { data } = await sb.from("v_stats").select("*").single();
+  if(!data) return;
+  $("sSoc").textContent=fmt(data.socios); $("sPai").textContent=fmt(data.paises); $("sVot").textContent=fmt(data.apoyos);
+}
+let provData = [];
+async function cargarRanking(){
+  const { data, error } = await sb.from("v_provincias").select("*");
+  if(error){ $("rankBox").innerHTML='<div class="vacio">No se ha podido cargar el ranking.</div>'; return; }
+  provData = data; pintarRanking();
+}
+function pintarRanking(){
+  const box=$("rankBox"); const por={};
+  provData.forEach(r=>{ (por[r.pais] ??= {n:0,prov:{}}).n+=r.socios; por[r.pais].prov[r.provincia]=r.socios; });
+  const lista=Object.entries(por).sort((a,b)=>b[1].n-a[1].n);
+  if(!lista.length){ box.innerHTML='<div class="vacio"><b>Aún no hay ningún país</b>El primer socio pone la primera bandera. ¿Serás tú?</div>'; return; }
+  const max=lista[0][1].n;
+  box.innerHTML='<ol class="rank">'+lista.map(([c,d],i)=>`
+    <li class="row${abierto===c?" sel":""}" data-c="${c}" tabindex="0">
+      <span class="p">${i+1}</span><span class="fl">${bandera(c)}</span><span class="nm">${esc(nombre(c))}</span>
+      <span class="s">${fmt(d.n)}<small>socio${d.n===1?"":"s"}</small></span>
+      <div class="bar"><i style="width:${d.n/max*100}%"></i></div>
+      ${abierto===c?`<div class="provs">${Object.entries(d.prov).sort((a,b)=>b[1]-a[1]).map(([p,n])=>`<div class="prov"><span>${esc(p)}</span><span>${n}</span></div>`).join("")}</div>`:""}
+    </li>`).join("")+'</ol>';
+}
+const toggleRow = e => { const r=e.target.closest(".row"); if(!r) return; abierto = abierto===r.dataset.c?null:r.dataset.c; pintarRanking(); };
+$("rankBox").addEventListener("click",toggleRow);
+$("rankBox").addEventListener("keydown",e=>{ if(e.key==="Enter") toggleRow(e); });
+
+async function cargarTop(){
+  const { data } = await sb.from("v_socios").select("ig,pais,puntos,numero").order("puntos",{ascending:false}).order("numero").limit(10);
+  const box=$("topBox");
+  if(!data || !data.length){ box.innerHTML='<div class="vacio"><b>Nadie en el podio</b>Los primeros socios estrenan el ranking.</div>'; return; }
+  box.innerHTML='<ol class="rank">'+data.map((s,i)=>`
+    <li class="row" style="grid-template-columns:24px 28px 1fr auto;cursor:default">
+      <span class="p">${i+1}</span><span class="fl">${bandera(s.pais)}</span><span class="nm">@${esc(s.ig)}</span><span class="s">${fmt(s.puntos)}<small>pts</small></span>
+    </li>`).join("")+'</ol>';
+}
+
+let props = [];
+async function cargarPropuestas(){
+  const { data, error } = await sb.from("v_propuestas").select("*").order("apoyos",{ascending:false}).order("creado");
+  if(error){ $("propBox").innerHTML='<div class="vacio">No se han podido cargar las propuestas.</div>'; return; }
+  props = data; pintarPropuestas();
+}
+function pintarPropuestas(){
+  const box=$("propBox");
+  const socio=!!perfil, apoyados=new Set(perfil?.apoyados||[]), quedan=socio?3-(perfil.apoyos_usados||0):0;
+  $("fNom").hidden = !socio || !!perfil.propuesta;
+  $("nomAviso").innerHTML = !usuario ? 'Para proponer y apoyar, <a href="#alta">hazte socio</a>. Es gratis.'
+    : !socio ? 'Termina tu carnet para poder participar.'
+    : `Te quedan <b>${quedan}</b> apoyo${quedan===1?"":"s"}.${perfil.propuesta?` Tu propuesta: <b>${esc(perfil.propuesta)}</b>.`:""}`;
+  if(!props.length){ box.innerHTML='<div class="vacio" style="margin-top:12px"><b>Aún no hay nombres</b>El primer nombre de la historia del club lo puede poner cualquiera.</div>'; return; }
+  box.innerHTML='<ol class="rank" style="margin-top:12px">'+props.map((p,i)=>{
+    const mio = perfil && perfil.ig.toLowerCase()===String(p.autor).toLowerCase();
+    const ya = apoyados.has(p.id);
+    let btn = "";
+    if(socio && !mio) btn = `<button class="btn sec mini-btn" type="button" data-id="${p.id}"${ya||quedan<=0?" disabled":""}>${ya?"Apoyado":"Apoyar"}</button>`;
+    return `<li class="row" style="grid-template-columns:24px 1fr auto auto;cursor:default">
+      <span class="p">${i+1}</span>
+      <span class="nm">${esc(p.nombre)}${i<2?' <small class="fin">· a la final</small>':""}<small class="autor">de @${esc(p.autor)}</small></span>
+      <span class="s">${fmt(p.apoyos)}<small>apoyos</small></span>${btn||"<span></span>"}
+    </li>`;}).join("")+'</ol>';
+}
+$("propBox").addEventListener("click", async e=>{
+  const b=e.target.closest("button[data-id]"); if(!b) return;
+  b.disabled=true;
+  const { error } = await sb.rpc("apoyar",{ p_id:Number(b.dataset.id) });
+  if(error){ $("errNom").textContent=errMsg(error); b.disabled=false; return; }
+  $("errNom").textContent=""; toast("Apoyo guardado · +5 puntos");
+  await cargarPerfil(); refrescarPublico();
+});
+$("fNom").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const n=$("nom").value.trim().replace(/\s+/g," ");
+  if(n.length<3){ $("errNom").textContent="Escribe un nombre de al menos 3 letras."; return; }
+  const { error } = await sb.rpc("proponer_nombre",{ p_nombre:n });
+  if(error){ $("errNom").textContent=errMsg(error); return; }
+  $("errNom").textContent=""; $("nom").value=""; toast("Propuesta guardada · +10 puntos");
+  await cargarPerfil(); refrescarPublico();
+});
+
+function refrescarPublico(){ cargarStats(); cargarRanking(); cargarTop(); cargarPropuestas(); }
+
+/* ---------- perfil ---------- */
+async function cargarPerfil(){
+  if(!usuario){ perfil=null; pintarSesion(); return; }
+  const { data, error } = await sb.rpc("mi_perfil");
+  perfil = error ? null : data;
+  pintarSesion();
+}
+async function puestoDe(p){
+  const { count } = await sb.from("v_socios").select("numero",{count:"exact",head:true}).gt("puntos",p.puntos);
+  return (count ?? 0) + 1;
+}
+async function pintarSesion(){
+  $("btnEntrar").hidden = !!usuario;
+  $("btnPerfil").hidden = !usuario;
+  $("ctaSocio").hidden = !!usuario;
+  $("alta").hidden = !!usuario && !recuperando;
+  $("perfil").hidden = !perfil;
+  $("completar").hidden = !(usuario && !perfil);
+  if(perfil){
+    const fundador = perfil.numero<=100;
+    $("pTit").textContent=`Socio nº ${fmt(perfil.numero)}${fundador?" · Fundador":""}`;
+    $("pUsr").textContent="@"+perfil.ig;
+    $("pCod").textContent=perfil.codigo||"";
+    $("pLug").textContent=`${bandera(perfil.pais)} ${perfil.provincia}, ${nombre(perfil.pais)}`;
+    $("pPts").textContent=fmt(perfil.puntos);
+    $("pEst").textContent=perfil.verificado?"Activo":"Sin activar";
+    $("pAct").innerHTML = perfil.verificado
+      ? "Tu carnet está <b>activo</b>. Sigue sumando puntos para tu país."
+      : `Para activar tu carnet, síguenos en <b>@club.desdecero</b> y mándanos <b>${esc(perfil.codigo||"")}</b> por mensaje directo.`;
+    $("pProp").innerHTML = perfil.propuesta ? `Tu propuesta de nombre: <b>${esc(perfil.propuesta)}</b>.` : `Aún no has propuesto nombre. <a href="#voto">Propón uno</a> y gana 10 puntos.`;
+    $("pRank").textContent="#"+fmt(await puestoDe(perfil));
+  }
+  pintarPropuestas();
+}
+$("salir").addEventListener("click", async ()=>{ await sb.auth.signOut(); toast("Has salido de tu cuenta"); });
+$("copy").addEventListener("click",()=>{
+  const t=$("pCod").textContent;
+  navigator.clipboard.writeText(t).then(()=>$("ok").textContent="Código copiado").catch(()=>{const r=document.createRange();r.selectNodeContents($("pCod"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("ok").textContent="Selecciona y copia el código"});
+});
+
+/* ---------- completar carnet ---------- */
+$("fCompletar").innerHTML = `
+  <label for="cIg">Tu @ de Instagram o TikTok<input id="cIg" placeholder="@tu_usuario"></label>
+  <label for="cPais">Tu país<select id="cPais"></select></label>
+  <label for="cProv" id="cProvLbl">Tu provincia o región<select id="cProv" disabled><option value="">Primero elige tu país…</option></select></label>
+  <label for="cProvTxt" id="cProvTxtLbl" hidden>Tu provincia, estado o región<input id="cProvTxt" placeholder="Escríbela aquí"></label>
+  <button class="btn" type="submit">Crear mi carnet</button>
+  <div class="err" id="errC" role="status"></div>`;
+rellenarPais($("cPais")); enlazarProvincia($("cPais"),$("cProv"),$("cProvLbl"),$("cProvTxtLbl"));
+$("fCompletar").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const ig=limpiarIg($("cIg").value), pais=$("cPais").value, prov=leerProvincia($("cPais"),$("cProv"),$("cProvTxt"));
+  if(!igValido(ig)) return $("errC").textContent="Escribe tu @ (letras, números, puntos o guiones bajos).";
+  if(!pais) return $("errC").textContent="Elige tu país.";
+  if(!prov) return $("errC").textContent="Elige o escribe tu provincia.";
+  const { error } = await sb.rpc("hacerse_socio",{ p_ig:ig, p_pais:pais, p_provincia:prov });
+  if(error) return $("errC").textContent = /duplicate|unique/i.test(error.message) ? "Ese @ ya es socio." : errMsg(error);
+  toast("¡Ya eres socio!"); await cargarPerfil(); refrescarPublico();
+});
+
+/* ---------- alta ---------- */
+function verTab(cual){
+  $("tabAlta").setAttribute("aria-selected", cual==="alta"); $("tabEntrar").setAttribute("aria-selected", cual==="entrar");
+  $("fAlta").hidden = cual!=="alta"; $("fEntrar").hidden = cual!=="entrar"; $("fNueva").hidden = cual!=="nueva";
+}
+$("tabAlta").addEventListener("click",()=>verTab("alta"));
+$("tabEntrar").addEventListener("click",()=>verTab("entrar"));
+$("btnEntrar").addEventListener("click",()=>verTab("entrar"));
+
+$("fAlta").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const err=$("err"), ig=limpiarIg($("ig").value), email=$("email").value.trim(), pass=$("pass").value;
+  const pais=$("pais").value, prov=leerProvincia($("pais"),$("prov"),$("provTxt"));
+  if(!igValido(ig)) return err.textContent="Escribe tu @ (letras, números, puntos o guiones bajos).";
+  if(!/^\S+@\S+\.\S+$/.test(email)) return err.textContent="Escribe un correo válido.";
+  if(pass.length<8) return err.textContent="La contraseña tiene que tener al menos 8 caracteres.";
+  if(!pais) return err.textContent="Elige tu país.";
+  if(!prov) return err.textContent="Elige o escribe tu provincia.";
+  if(!$("acepto").checked) return err.textContent="Marca la casilla de edad y privacidad para hacerte socio.";
+  err.textContent=""; $("bAlta").disabled=true; $("bAlta").textContent="Creando tu carnet…";
+  try{
+    const { data:libre, error:e1 } = await sb.rpc("ig_libre",{ p_ig:ig });
+    if(e1) throw e1;
+    if(!libre) throw new Error("Ese @ ya es socio. Si es tuyo, entra en \"Ya soy socio\".");
+    const { data, error:e2 } = await sb.auth.signUp({ email, password:pass, options:{ data:{ ig } } });
+    if(e2) throw new Error(/registered|exists/i.test(e2.message) ? "Ese correo ya tiene cuenta. Entra en \"Ya soy socio\"." : e2.message);
+    if(!data.session) throw new Error("Revisa tu correo para confirmar la cuenta y luego entra.");
+    const { error:e3 } = await sb.rpc("hacerse_socio",{ p_ig:ig, p_pais:pais, p_provincia:prov });
+    if(e3) throw e3;
+    toast("¡Bienvenido al club!");
+    usuario = data.session.user; await cargarPerfil(); refrescarPublico();
+    $("perfil").scrollIntoView({behavior:"smooth"});
+  }catch(x){ err.textContent=errMsg(x); }
+  finally{ $("bAlta").disabled=false; $("bAlta").textContent="Crear mi carnet"; }
+});
+
+$("fEntrar").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const { error } = await sb.auth.signInWithPassword({ email:$("eEmail").value.trim(), password:$("ePass").value });
+  if(error) return $("errE").textContent = /invalid/i.test(error.message) ? "Correo o contraseña incorrectos." : errMsg(error);
+  $("errE").textContent=""; toast("¡Hola de nuevo!");
+});
+$("olvide").addEventListener("click", async ()=>{
+  const email=$("eEmail").value.trim();
+  if(!/^\S+@\S+\.\S+$/.test(email)) return $("errE").textContent="Escribe primero tu correo arriba.";
+  const { error } = await sb.auth.resetPasswordForEmail(email,{ redirectTo: location.origin+location.pathname });
+  $("errE").textContent = error ? errMsg(error) : "";
+  if(!error) toast("Te hemos mandado un correo para cambiar la contraseña");
+});
+$("fNueva").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const p=$("nPass").value; if(p.length<8) return $("errN").textContent="Mínimo 8 caracteres.";
+  const { error } = await sb.auth.updateUser({ password:p });
+  if(error) return $("errN").textContent=errMsg(error);
+  recuperando=false; toast("Contraseña cambiada"); verTab("alta"); pintarSesion();
+});
+
+/* ---------- sesión ---------- */
+sb.auth.onAuthStateChange((ev, session)=>{
+  usuario = session?.user || null;
+  if(ev==="PASSWORD_RECOVERY"){ recuperando=true; verTab("nueva"); $("alta").hidden=false; $("alta").scrollIntoView(); }
+  setTimeout(cargarPerfil,0);
+});
+
+/* ---------- reloj y arranque ---------- */
+function reloj(){const now=new Date(),fin=new Date(now);fin.setHours(24,0,0,0);let s=Math.floor((fin-now)/1000);const h=String(Math.floor(s/3600)).padStart(2,"0");s%=3600;$("cierra").textContent=`Cierra en ${h}:${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`}
+reloj(); setInterval(reloj,1000);
+refrescarPublico();
+setInterval(refrescarPublico, 30000);
+</script>
+</body>
+</html>
