@@ -149,3 +149,6 @@ revoke all on function public.ig_libre(text), public.hacerse_socio(text,text,tex
 grant execute on function public.ig_libre(text) to anon, authenticated;
 grant execute on function public.hacerse_socio(text,text,text), public.mi_perfil(),
   public.proponer_nombre(text), public.apoyar(bigint) to authenticated;
+
+-- Recargar la API para que vea las funciones nuevas
+notify pgrst, 'reload schema';
