@@ -376,6 +376,27 @@ h2{position:relative}
 @keyframes cinta2{from{transform:translateX(-50%)}to{transform:translateX(0)}}
 @keyframes respira{0%,100%{-webkit-text-stroke-color:rgba(255,255,255,.05)}50%{-webkit-text-stroke-color:rgba(255,255,255,.11)}}
 @media (max-width:520px){.aro{width:120px;height:120px;margin:-60px 0 0 -60px}.vallas{margin-top:-12px}}
+.escudo span.ini{font-size:46px;letter-spacing:.02em}
+.carnet .mini span{font-size:20px}
+.hero .ya{margin:10px 0 0;font-family:var(--mono);font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--verde)}
+.dato.hecho{border:1px solid rgba(63,209,127,.5)}
+.dato.hecho .v{color:var(--texto)}
+.dato.hecho::after{content:"✓";color:rgba(63,209,127,.18)}
+.colores{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.color-opt{position:relative;overflow:hidden;font:inherit;color:var(--texto);text-align:center;cursor:pointer;background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.18);border-radius:16px;padding:16px 10px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.color-opt:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.6);box-shadow:0 14px 30px rgba(0,0,0,.45)}
+.color-opt svg{width:min(150px,80%);height:auto;filter:drop-shadow(0 10px 16px rgba(0,0,0,.5))}
+.color-opt .letra{font-family:var(--display);font-weight:900;font-size:22px;background:var(--tiza);color:#0a0d0b;border-radius:999px;width:36px;height:36px;display:grid;place-items:center}
+.color-opt b{font-family:var(--display);font-size:clamp(22px,5.5vw,30px);text-transform:uppercase;line-height:1}
+.color-opt .barra{width:100%;height:8px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:4px}
+.color-opt .barra i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cesped),var(--verde));transition:width .8s ease}
+.color-opt .pct{font-family:var(--mono);font-size:14px;color:#c5d6ca}
+.color-opt.mio{border-color:var(--verde);box-shadow:0 0 0 4px rgba(63,209,127,.18)}
+.color-opt.mio::before{content:"TU VOTO";position:absolute;top:10px;right:10px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;background:var(--verde);color:#0a0d0b;border-radius:999px;padding:3px 8px}
+.color-opt[disabled]{cursor:default}
+.color-opt[disabled]:hover{transform:none}
+@media (prefers-reduced-motion:no-preference){.color-opt:not([disabled]) svg{animation:ondear 3s ease-in-out infinite}.color-opt:nth-child(2):not([disabled]) svg{animation-delay:-1.5s}}
+@keyframes ondear{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) translateY(-4px)}}
 </style>
 </head>
 <body>
@@ -383,7 +404,7 @@ h2{position:relative}
 <div class="minuto" aria-hidden="true"><i id="minBar"></i><span id="minTxt">0'</span></div>
 <div class="estadio" id="estadio">
   <canvas class="grada" id="grada" aria-hidden="true"></canvas>
-  <div class="gigante" aria-hidden="true">DÍA 0</div>
+  <div class="gigante" aria-hidden="true">DÍA 2</div>
   <div class="focos" aria-hidden="true"><i></i><i></i></div>
   <div class="cesped" aria-hidden="true">
     <svg viewBox="0 0 600 400" preserveAspectRatio="none"><g fill="none" stroke="rgba(255,255,255,.55)" stroke-width="3"><rect x="20" y="20" width="560" height="360"/><line x1="300" y1="20" x2="300" y2="380"/><circle cx="300" cy="200" r="60"/><circle cx="300" cy="200" r="4" fill="rgba(255,255,255,.7)"/><rect x="20" y="110" width="80" height="180"/><rect x="500" y="110" width="80" height="180"/><rect x="20" y="160" width="28" height="80"/><rect x="552" y="160" width="28" height="80"/></g></svg>
@@ -398,15 +419,16 @@ h2{position:relative}
     </header>
 
     <section class="hero">
-      <div class="escudo-wrap" aria-hidden="true"><div class="escudo"><span>?</span></div><i class="aro"></i><i class="aro a2"></i></div>
+      <div class="escudo-wrap" aria-hidden="true"><div class="escudo"><span class="ini">DV</span></div><i class="aro"></i><i class="aro a2"></i></div>
       <div>
-        <span class="dia"><i class="live"></i>DÍA 0 · EN DIRECTO</span>
-        <h1><span class="w">Un club</span> <span class="w">sin nombre,</span> <span class="w">sin colores</span> <span class="w">y <u>sin socios</u>.</span> <span class="w tod">Todavía.</span></h1>
+        <span class="dia"><i class="live"></i>DÍA 2 · EN DIRECTO</span>
+        <p class="ya">Ya tenemos nombre</p>
+        <h1><span class="w">Deportivo</span> <span class="w">de los</span> <span class="w tod">Volcanes.</span></h1>
       </div>
     </section>
-    <p class="intro">Vamos a crear un club de fútbol desde cero entre todos. Cada día votamos una cosa: el nombre, los colores, el estadio, los fichajes. Hazte socio y suma puntos para tu país y tu provincia.</p>
+    <p class="intro">El nombre ya es oficial: ganó la final con el <b>75%</b> de los votos. Ahora toca lo más importante: <b>¿de qué color será la camiseta?</b> Hazte socio, vota y suma puntos para tu país y tu provincia.</p>
     <div class="ctas">
-      <button class="btn grande" type="button" data-go="voto">⚽ Proponer un nombre</button>
+      <button class="btn grande" type="button" data-go="voto">⚽ Votar los colores</button>
       <button class="btn sec grande" type="button" data-go="alta" id="ctaSocio">Ser de los primeros</button>
     </div>
 
@@ -418,7 +440,7 @@ h2{position:relative}
   </div>
   <div class="balon-rueda" aria-hidden="true"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="#f4f4ef" stroke="#111" stroke-width="3"/><polygon points="50,30 69,44 62,66 38,66 31,44" fill="#111"/><path d="M50 30V8M69 44l20-8M62 66l13 18M38 66L25 84M31 44l-20-8" stroke="#111" stroke-width="3" fill="none"/><path d="M38 9l12-1 12 1M84 27l6 12-1 13M86 69l-8 11-11 6M33 91l-12-6-8-11M10 52l-1-13 6-12" stroke="#111" stroke-width="6" fill="none" stroke-linecap="round"/></svg></div>
 </div>
-<div class="vallas"><div class="ticker" aria-hidden="true"><div class="ticker-in"><span>DÍA 0 · PROPÓN EL NOMBRE DEL CLUB · LOS 2 MÁS APOYADOS VAN A LA FINAL · CADA SEGUIDOR ES UN SOCIO · INVITA A TUS AMIGOS Y GANA +15 · </span><span>DÍA 0 · PROPÓN EL NOMBRE DEL CLUB · LOS 2 MÁS APOYADOS VAN A LA FINAL · CADA SEGUIDOR ES UN SOCIO · INVITA A TUS AMIGOS Y GANA +15 · </span></div></div><div class="ticker t2" aria-hidden="true"><div class="ticker-in"><span>⚽ TÚ DECIDES · NOMBRE · COLORES · ESCUDO · ESTADIO · FICHAJES · HAZTE SOCIO GRATIS · </span><span>⚽ TÚ DECIDES · NOMBRE · COLORES · ESCUDO · ESTADIO · FICHAJES · HAZTE SOCIO GRATIS · </span></div></div></div>
+<div class="vallas"><div class="ticker" aria-hidden="true"><div class="ticker-in"><span>DÍA 2 · YA TENEMOS NOMBRE · DEPORTIVO DE LOS VOLCANES · AHORA VOTA LOS COLORES · CADA SEGUIDOR ES UN SOCIO · INVITA Y GANA +15 · </span><span>DÍA 2 · YA TENEMOS NOMBRE · DEPORTIVO DE LOS VOLCANES · AHORA VOTA LOS COLORES · CADA SEGUIDOR ES UN SOCIO · INVITA Y GANA +15 · </span></div></div><div class="ticker t2" aria-hidden="true"><div class="ticker-in"><span>⚽ NEGRO Y BLANCO · ROJO Y NEGRO · TÚ DECIDES LOS COLORES · HAZTE SOCIO GRATIS · </span><span>⚽ NEGRO Y BLANCO · ROJO Y NEGRO · TÚ DECIDES LOS COLORES · HAZTE SOCIO GRATIS · </span></div></div></div>
 
 <div class="wrap">
   <!-- MI PERFIL -->
@@ -428,7 +450,7 @@ h2{position:relative}
       <button class="btn sec" type="button" id="salir">Salir</button>
     </div>
     <div class="carnet">
-      <div class="mini" aria-hidden="true"><span>?</span></div>
+      <div class="mini" aria-hidden="true"><span>DV</span></div>
       <div style="min-width:0"><div class="t" id="pTit"></div><div class="u" id="pUsr"></div><div class="c" id="pCod"></div><div class="n" id="pLug"></div></div>
     </div>
     <div class="perfil-datos">
@@ -488,30 +510,29 @@ h2{position:relative}
   </section>
 
   <section class="voto" id="voto">
-    <div class="top"><span class="dia">DÍA 0 · PROPUESTAS</span><span class="cierra" id="cierra">Cierra en --:--:--</span></div>
-    <h3>¿Cómo se llama nuestro club?</h3>
-    <p class="nota" style="margin:-6px 0 14px">Cada socio propone <b>un nombre</b> y apoya hasta <b>3</b>. Los <b>2 más apoyados</b> pasan a la final del Día 1.</p>
-    <form id="fNom" class="nomForm" novalidate hidden>
-      <label for="nom">Tu propuesta<input id="nom" maxlength="30" placeholder="Ej: Deportivo Huracán" autocomplete="off"></label>
-      <button class="btn" type="submit">Proponer nombre</button>
-    </form>
-    <p class="nota" id="nomAviso"></p>
-    <div class="err" id="errNom" role="status"></div>
-    <div id="propBox"></div>
+    <div class="top"><span class="dia">DÍA 2 · LOS COLORES</span><span class="cierra" id="cierra">Votación abierta</span></div>
+    <h3>¿De qué color es el Deportivo de los Volcanes?</h3>
+    <p class="nota" style="margin:-6px 0 14px">Cada socio tiene <b>1 voto</b> y gana <b>+5 puntos</b>. También cuenta la encuesta del vídeo en Instagram.</p>
+    <div class="colores" id="coloresBox"></div>
+    <p class="nota" id="votoAviso"></p>
+    <div class="err" id="errVoto" role="status"></div>
     <div id="igBox" hidden>
-      <h4 class="ig-tit">📸 Propuestas desde Instagram</h4>
-      <p class="nota" style="margin:0 0 6px">Nombres comentados en el vídeo. Cuenta cada like del comentario.</p>
+      <h4 class="ig-tit">📸 Lo que dicen en Instagram</h4>
+      <p class="nota" style="margin:0 0 6px">Comentarios del último vídeo de @club.desdecero, ordenados por likes.</p>
       <div id="igLista"></div>
     </div>
-    <p class="nota">También cuenta si lo comentas en el vídeo del Día 0 de <b>@club.desdecero</b> en Instagram.</p>
+    <div hidden>
+      <form id="fNom" class="nomForm" novalidate hidden><input id="nom"></form>
+      <p id="nomAviso"></p><div id="errNom"></div><div id="propBox"></div>
+    </div>
   </section>
 
   <section id="club">
     <h2>Nuestro club</h2>
     <p class="sub">Aquí irá apareciendo todo lo que decidan los socios.</p>
     <div class="ficha">
-      <div class="dato hoy"><div class="k">Nombre</div><div class="v">Propuestas abiertas</div><div class="d">Día 0 propuestas · Día 1 final</div></div>
-      <div class="dato"><div class="k">Colores</div><div class="v">?</div><div class="d">Día 2</div></div>
+      <div class="dato hecho"><div class="k">Nombre</div><div class="v">Deportivo de los Volcanes</div><div class="d">Día 1 · ganó con el 75%</div></div>
+      <div class="dato hoy"><div class="k">Colores</div><div class="v">Se vota hoy</div><div class="d">Día 2 · negro y blanco o rojo y negro</div></div>
       <div class="dato"><div class="k">Escudo y mascota</div><div class="v">?</div><div class="d">Día 3</div></div>
       <div class="dato"><div class="k">Ciudad</div><div class="v">?</div><div class="d">Día 4</div></div>
       <div class="dato"><div class="k">Estadio</div><div class="v">🔒 1.000 socios</div><div class="d">Meta</div></div>
@@ -523,7 +544,7 @@ h2{position:relative}
     <h2>Lo que se desbloquea</h2>
     <p class="sub">Cada meta de socios abre votaciones nuevas.</p>
     <ul class="metas">
-      <li class="meta now"><span class="st">1</span><div><b>Nombre, colores, escudo y ciudad</b><span>Hoy proponemos nombres, mañana la final</span></div><span class="n">0</span></li>
+      <li class="meta now"><span class="st">1</span><div><b>Nombre, colores, escudo y ciudad</b><span>Nombre ✓ · hoy votamos los colores</span></div><span class="n">0</span></li>
       <li class="meta"><span class="st">2</span><div><b>El estadio</b><span>Tamaño, nombre y dónde se construye</span></div><span class="n">1.000</span></li>
       <li class="meta"><span class="st">3</span><div><b>Primer fichaje y entrenador</b><span>Joven promesa o veterano</span></div><span class="n">5.000</span></li>
       <li class="meta"><span class="st">4</span><div><b>Primer partido</b><span>Los socios eligen la alineación</span></div><span class="n">10.000</span></li>
@@ -546,8 +567,7 @@ h2{position:relative}
   <section>
     <h2>Cómo se suman puntos</h2>
     <div class="pts-grid">
-      <div class="pt"><b>+10</b><p>Proponer un nombre para el club</p></div>
-      <div class="pt"><b>+5</b><p>Cada apoyo que das (hasta 3)</p></div>
+      <div class="pt"><b>+5</b><p>Votar en la decisión de cada día</p></div>
       <div class="pt"><b>+10</b><p>Activar tu carnet mandando tu código por DM</p></div>
       <div class="pt"><b>+15</b><p>Cada amigo que se haga socio con tu enlace</p></div>
       <div class="pt"><b>★</b><p>Los 100 primeros socios serán Fundadores para siempre</p></div>
@@ -755,7 +775,7 @@ $("fNom").addEventListener("submit", async e=>{
   await cargarPerfil(); refrescarPublico();
 });
 
-function refrescarPublico(){ cargarStats(); cargarRanking(); cargarTop(); cargarPropuestas(); cargarIG(); }
+function refrescarPublico(){ cargarStats(); cargarRanking(); cargarTop(); cargarIG(); cargarVotos(); }
 
 /* ---------- perfil ---------- */
 async function cargarPerfil(){
@@ -794,6 +814,7 @@ async function pintarSesion(){
     $("pRank").textContent = perfil.es_admin ? "Admin" : "#"+fmt(await puestoDe(perfil));
   }
   pintarPropuestas();
+  if(typeof cargarVotos==="function") cargarVotos();
   if(typeof cargarAdmin==="function") cargarAdmin();
 }
 $("salir").addEventListener("click", async ()=>{ await sb.auth.signOut(); toast("Has salido de tu cuenta"); });
@@ -962,7 +983,7 @@ async function cargarIG(){
   const { data, error } = await sb.from("v_ig_propuestas").select("*").order("likes",{ascending:false}).order("comentarios",{ascending:false}).limit(30);
   if(error || !data){ $("igBox").hidden=true; return; }
   $("igBox").hidden = false;
-  $("igLista").innerHTML = !data.length ? '<div class="vacio"><b>Aún no hay comentarios</b>Comenta tu nombre en el último vídeo de @club.desdecero.</div>'
+  $("igLista").innerHTML = !data.length ? '<div class="vacio"><b>Aún no hay comentarios</b>Comenta en el último vídeo de @club.desdecero qué colores quieres.</div>'
     : '<ol class="rank">'+data.map((p,i)=>`
       <li class="row" style="grid-template-columns:24px 1fr auto auto;cursor:default">
         <span class="p">${i+1}</span>
@@ -1080,9 +1101,50 @@ if(!SIN_MOV && "IntersectionObserver" in window){
   });
 })();
 
+
+/* ---------- votación del día (colores) ---------- */
+const VOTACION = "colores";
+let VOTO_ABIERTA = true, miVoto = null;
+function camisetaSVG(op){
+  const a = op===1 ? ["#111214","#f5f5f0"] : ["#111214","#d02026"];
+  const rayas = Array.from({length:6},(_,i)=>`<rect x="${10+i*34+17}" y="0" width="17" height="200" fill="${a[1]}"/>`).join("");
+  return `<svg viewBox="0 0 220 200" aria-hidden="true"><defs><clipPath id="cm${op}"><path d="M60 22 88 10q22 14 44 0l28 12 50 40-28 34-20-16v118H58V80L38 96 10 62Z"/></clipPath></defs>
+  <g clip-path="url(#cm${op})"><rect width="220" height="200" fill="${a[0]}"/>${rayas}</g>
+  <path d="M60 22 88 10q22 14 44 0l28 12 50 40-28 34-20-16v118H58V80L38 96 10 62Z" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="3"/>
+  <path d="M120 64h22v16l-11 10-11-10Z" fill="#f1f2ec" stroke="#111" stroke-width="2"/><text x="131" y="79" font-size="9" font-weight="900" text-anchor="middle" fill="#111" font-family="sans-serif">DV</text></svg>`;
+}
+async function cargarVotos(){
+  const { data, error } = await sb.from("v_votos").select("*").eq("votacion_id", VOTACION).order("opcion");
+  const box=$("coloresBox");
+  if(error || !data || !data.length){ box.innerHTML='<div class="vacio" style="grid-column:1/-1">La votación de los colores se abre en un momento.</div>'; return; }
+  VOTO_ABIERTA = data[0].abierta; reloj();
+  if(perfil){ const r = await sb.rpc("mi_voto",{ p_votacion:VOTACION }); miVoto = r.data ?? null; } else miVoto = null;
+  const total = data.reduce((s,o)=>s+o.votos,0);
+  box.innerHTML = data.map(o=>{
+    const pct = total ? Math.round(o.votos/total*100) : 0;
+    const bloq = !!miVoto || !VOTO_ABIERTA;
+    return `<button class="color-opt${miVoto===o.opcion?" mio":""}" type="button" data-op="${o.opcion}"${bloq?" disabled":""}>
+      <span class="letra">${o.opcion===1?"A":"B"}</span>${camisetaSVG(o.opcion)}<b>${esc(o.texto)}</b>
+      <span class="barra"><i style="width:${pct}%"></i></span><span class="pct">${pct}% · ${fmt(o.votos)} voto${o.votos===1?"":"s"}</span></button>`;
+  }).join("");
+  $("votoAviso").innerHTML = !VOTO_ABIERTA ? "La votación está cerrada. El resultado sale en la próxima parte."
+    : !usuario ? 'Para votar, <a href="#alta">hazte socio</a>. Es gratis.'
+    : !perfil ? "Termina tu carnet para poder votar."
+    : miVoto ? "¡Voto registrado! El resultado sale en la próxima parte." : "Toca la camiseta que quieres para el club.";
+}
+$("coloresBox").addEventListener("click", async e=>{
+  const b=e.target.closest(".color-opt"); if(!b || b.disabled) return;
+  if(!perfil){ $("errVoto").textContent=""; $("alta").scrollIntoView({behavior:"smooth"}); toast("Hazte socio para votar"); return; }
+  b.disabled=true;
+  const { error } = await sb.rpc("votar",{ p_votacion:VOTACION, p_opcion:Number(b.dataset.op) });
+  if(error){ $("errVoto").textContent=errMsg(error); b.disabled=false; return; }
+  $("errVoto").textContent=""; gol("¡VOTADO!","Tu voto ya cuenta · +5 puntos");
+  await cargarPerfil(); refrescarPublico();
+});
+
 /* ---------- reloj y arranque ---------- */
 const CIERRE_DIA = new Date("2026-11-10T19:30:00Z"); // 19:30 en Canarias (cambia esta fecha cada día)
-function reloj(){let s=Math.floor((CIERRE_DIA-new Date())/1000);if(s<=0){$("cierra").textContent="Votación cerrada";return}const h=String(Math.floor(s/3600)).padStart(2,"0");s%=3600;$("cierra").textContent=`Cierra en ${h}:${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`}
+function reloj(){ $("cierra").textContent = VOTO_ABIERTA ? "Votación abierta" : "Votación cerrada"; return;let s=Math.floor((CIERRE_DIA-new Date())/1000);if(s<=0){$("cierra").textContent="Votación cerrada";return}const h=String(Math.floor(s/3600)).padStart(2,"0");s%=3600;$("cierra").textContent=`Cierra en ${h}:${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`}
 reloj(); setInterval(reloj,1000);
 refrescarPublico();
 setInterval(refrescarPublico, 30000);
